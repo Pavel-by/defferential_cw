@@ -12,7 +12,6 @@ SOURCES += \
     cube.cpp \
     drawer.cpp \
     figure.cpp \
-    figurewrapper.cpp \
     main.cpp \
     mainwindow.cpp \
     shaderprogramwrapper.cpp \
@@ -22,7 +21,6 @@ HEADERS += \
     cube.h \
     drawer.h \
     figure.h \
-    figurewrapper.h \
     mainwindow.h \
     shaderprogramwrapper.h \
     viewmatrixwrapper.h

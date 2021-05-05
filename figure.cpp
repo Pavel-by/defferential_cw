@@ -6,43 +6,41 @@ Figure::Figure():QObject()
 
 }
 
-Figure::Figure(const Figure& other) {
-    *this = other;
+Figure::~Figure() {
+    if (_vao) glDeleteVertexArrays(1, &_vao);
+    if (_vbo) glDeleteBuffers(1, &_vbo);
+    if (_veo) glDeleteBuffers(1, &_veo);
 }
 
-Figure::~Figure() {}
+void Figure::initialize() {
+    initializeOpenGLFunctions();
 
-void Figure::initialize(QOpenGLShaderProgram* program) {
-    _vao.create();
-    _vao.bind();
+    glGenVertexArrays(1, &_vao);
+    glGenBuffers(1, &_vbo);
+    glGenBuffers(1, &_veo);
 
-    _verticesBufferGL.create();
-    _verticesBufferGL.bind();
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _veo);
 
-    int offset = 0;
-    program->enableAttributeArray("vertex");
-    program->setAttributeBuffer("vertex", GL_FLOAT, offset, 3, sizeof(VertexData));
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, sizeof(VertexData), 0);
 
-    offset += sizeof(QVector3D);
-    program->enableAttributeArray("color");
-    program->setAttributeBuffer("color", GL_FLOAT, offset, 4, sizeof(VertexData));
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glNormalPointer(GL_FLOAT, sizeof(VertexData), reinterpret_cast<GLvoid*>(sizeof(QVector3D)));
 
-    offset += sizeof(QVector4D);
-    program->enableAttributeArray("normal");
-    program->setAttributeBuffer("normal", GL_FLOAT, offset, 3, sizeof(VertexData));
-
-    _indicesBufferGL.create();
-    _indicesBufferGL.bind();
-
-    _vao.release();
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
 }
 
-void Figure::paint(QOpenGLShaderProgram* program) {
+void Figure::paint() {
     allocateBuffers();
-    program->setUniformValue("model", model);
-    _vao.bind();
-    glDrawElements(GL_TRIANGLES, _indicesBuffer.size(), GL_UNSIGNED_INT, 0);
-    _vao.release();
+    glBindVertexArray(_vao);
+    glDrawElements(GL_TRIANGLES, _indicesBuffer.size(), GL_UNSIGNED_INT, nullptr);
+    glBindVertexArray(0);
 }
 
 void Figure::allocateBuffers() {
@@ -63,6 +61,7 @@ void Figure::allocateBuffers() {
     _indicesBuffer.resize(indicesCount);
 
     int vertexPosition = 0, indexPosition = 0;
+    QMatrix4x4 normalMatrix = model().inverted().transposed();
 
     for (const Edge& edge : edges) {
         for (int i = 2; i < edge.vertices.size(); i++) {
@@ -71,19 +70,26 @@ void Figure::allocateBuffers() {
             _indicesBuffer[indexPosition++] = vertexPosition + i;
         }
         QVector3D normal = edge.normal();
-        for (const QVector3D* vertex : edge.vertices) {
+        for (const QVector3D& vertex : edge.vertices) {
             _verticesBuffer[vertexPosition++] = {
-                *vertex,
-                color,
-                normal
+                vertex,
+                -normal
+                //(normalMatrix * normal).normalized()
             };
         }
     }
 
-    _verticesBufferGL.bind();
-    _verticesBufferGL.allocate(_verticesBuffer.constData(), _verticesBuffer.size() * sizeof(VertexData));
-    _indicesBufferGL.bind();
-    _indicesBufferGL.allocate(_indicesBuffer.constData(), _indicesBuffer.size() * sizeof(GLuint));
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferData(GL_ARRAY_BUFFER, _verticesBuffer.size() * sizeof(VertexData), _verticesBuffer.constData(), GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _veo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicesBuffer.size() * sizeof(GLuint), _indicesBuffer.constData(), GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Figure::translateIdentity() {
+    _modelTranslate = QMatrix4x4();
 }
 
 void Figure::markNeedsPaint() {
@@ -94,25 +100,21 @@ void Figure::markVertexChanged() {
     _verticesChanged = true;
 }
 
-Figure& Figure::operator=(const Figure& other) {
-    vertices = other.vertices;
-    edges = other.edges;
-    model = other.model;
-    color = other.color;
-    _verticesChanged = true;
-    return *this;
-}
-
 void Figure::rotate(float angle, const QVector3D& vector) {
-    QVector3D t = model * center;
-    model.translate(-t);
-    model.rotate(angle, vector);
-    model.translate(t);
+    _modelRotation.rotate(angle, vector);
+    markVertexChanged();
 }
 
 void Figure::scale(QVector3D vector) {
-    QVector3D t = model * center;
-    model.translate(-t);
-    model.scale(vector);
-    model.translate(t);
+    _modelScale.scale(vector);
+    markVertexChanged();
 }
+
+void Figure::translate(QVector3D vector) {
+    _modelTranslate.translate(_modelRotation * vector);
+}
+
+QMatrix4x4 Figure::model() const {
+    return _modelTranslate * _modelRotation * _modelScale;
+}
+

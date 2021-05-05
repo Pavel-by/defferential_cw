@@ -7,25 +7,26 @@
 #include <QVector3D>
 #include <QVector>
 #include <QOpenGLShaderProgram>
+#include <QGLFunctions>
+#include <QOpenGLFunctions_3_3_Core>
 
 struct VertexData {
     QVector3D vertex;
-    QVector4D color;
     QVector3D normal;
 };
 
 struct Edge {
-    QVector<const QVector3D*> vertices;
+    QVector<QVector3D> vertices;
 
     QVector3D normal() const {
         assert(vertices.size() >= 3);
-        QVector3D v1 = *vertices[2] - *vertices[1],
-                v2 = *vertices[0] - *vertices[1];
+        QVector3D v1 = vertices[2] - vertices[1],
+                v2 = vertices[0] - vertices[1];
         return QVector3D::crossProduct(v1, v2);
     }
 };
 
-class Figure : QObject
+class Figure : public QObject, protected QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 
@@ -34,30 +35,35 @@ signals:
 
 public:
     Figure();
-    Figure(const Figure& other);
     ~Figure() override;
 
-    QVector3D center;
-    QVector<QVector3D> vertices;
     QVector<Edge> edges;
-    QMatrix4x4 model;
-    QVector4D color = QVector4D(1.0f, 0.0f, 0.0f, 1.0f);
 
-    void initialize(QOpenGLShaderProgram* program);
-    void paint(QOpenGLShaderProgram* program);
+    QMatrix4x4 model() const;
+
+    void initialize();
+    void paint();
 
     void rotate(float angle, const QVector3D& vector);
     void scale(QVector3D vector);
+    void translate(QVector3D vector);
+    void translateIdentity();
 
     void markNeedsPaint();
     void markVertexChanged();
 
-    Figure& operator=(const Figure& other);
-
 private:
-    QOpenGLVertexArrayObject _vao;
-    QOpenGLBuffer _verticesBufferGL = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    QOpenGLBuffer _indicesBufferGL = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+    QMatrix4x4 _modelRotation;
+    QMatrix4x4 _modelTranslate;
+    QMatrix4x4 _modelScale;
+
+    // VBO - vertices data buffer
+    GLuint _vbo = 0;
+    // VEO - array of elements (indicies in VBO)
+    GLuint _veo = 0;
+    // VAO - configuration of vertices
+    GLuint _vao = 0;
+
     QVector<VertexData> _verticesBuffer;
     QVector<int> _indicesBuffer;
 

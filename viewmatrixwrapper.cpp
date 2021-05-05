@@ -125,7 +125,7 @@ void ViewMatrixWrapper::timerTimeout() {
     float delta = static_cast<float>((now - _lastTime)) / CLOCKS_PER_SEC;
     _lastTime = now;
     direction.normalize();
-    _playerAt += direction  * delta * 8.0f;
+    _playerAt += direction  * delta * 12.0f;
     emit changed();
 }
 
