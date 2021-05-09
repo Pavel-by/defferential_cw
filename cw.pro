@@ -12,8 +12,11 @@ SOURCES += \
     cube.cpp \
     drawer.cpp \
     figure.cpp \
+    iceberg.cpp \
+    integralcalculator.cpp \
     main.cpp \
     mainwindow.cpp \
+    polyhedron.cpp \
     shaderprogramwrapper.cpp \
     viewmatrixwrapper.cpp
 
@@ -21,7 +24,11 @@ HEADERS += \
     cube.h \
     drawer.h \
     figure.h \
+    iceberg.h \
+    integralcalculator.h \
+    log.h \
     mainwindow.h \
+    polyhedron.h \
     shaderprogramwrapper.h \
     viewmatrixwrapper.h
 

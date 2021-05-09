@@ -1,10 +1,26 @@
 ﻿#include "polyhedron.h"
+#include "integralcalculator.h"
+#include "log.h"
+
+using namespace std;
+
+std::string vtos(QVector3D v) {
+    return QString(QString::number(v.x()) + " " + QString::number(v.y()) + " " + QString::number(v.z()) + " ").toUtf8().constData();
+}
+
+string mtos(QMatrix4x4 m) {
+    return QString(QString::number(m(0, 0)) + " " + QString::number(m(0, 1)) + " " + QString::number(m(0, 2)) + " " + QString::number(m(0, 3)) + "\n" +
+                   QString::number(m(1, 0)) + " " + QString::number(m(1, 1)) + " " + QString::number(m(1, 2)) + " " + QString::number(m(1, 3)) + "\n" +
+                   QString::number(m(2, 0)) + " " + QString::number(m(2, 1)) + " " + QString::number(m(2, 2)) + " " + QString::number(m(2, 3)) + "\n" +
+                   QString::number(m(3, 0)) + " " + QString::number(m(3, 1)) + " " + QString::number(m(3, 2)) + " " + QString::number(m(3, 3))).toUtf8().constData();
+}
 
 Polyhedron::Polyhedron(QVector<Edge> faces, double density)
 {
     int numFaces = faces.length();
+    this->faces.resize(numFaces);
     for (int i = 0; i < numFaces; i++) {
-        this->faces[i] = faces[i];
+        this->faces[i] = (const Edge&) faces[i];
     }
     if (density > DENSITY_OF_WATER) {
         this->density = 916.7;
@@ -53,7 +69,10 @@ void Polyhedron::computeNewState(float h) {
 
 QMatrix4x4 skewMatrix(QVector3D vec)
 {
-    float m[] = {0, -vec[2], vec[1], 0, vec[2], 0, -vec[0], 0, -vec[1], vec[0], 0, 0};
+    float m[] = {0, -vec.z(), vec.y(), 0,
+                 vec.z(), 0, -vec.x(), 0,
+                 -vec.y(), vec.x(), 0, 0,
+                0, 0, 0, 0};
     return QMatrix4x4(m);
 }
 
@@ -72,9 +91,7 @@ void Polyhedron::x_dot(QVector3D c, QVector3D p, QMatrix4x4 R, QVector3D L, QVec
 QVector3D Polyhedron::calculateOmega() {
     QMatrix4x4 Jcurr = R*J*R.transposed();
     QMatrix4x4 Jinv = Jcurr.inverted();
-    QVector3D omega = QVector3D(QVector3D::dotProduct(L, QVector3D(Jinv(1,1), Jinv(1,2), Jinv(1,3))),
-                      QVector3D::dotProduct(L, QVector3D(Jinv(2,1), Jinv(2,2), Jinv(2,3))),
-                      QVector3D::dotProduct(L, QVector3D(Jinv(3,1), Jinv(3,2), Jinv(3,3))));
+    QVector3D omega = Jinv * L;
     return omega;
 }
 
@@ -98,9 +115,10 @@ void Polyhedron::setState(QVector3D c, QVector3D p, QMatrix4x4 R, QVector3D L)
 {
     this->p = p;
     this->L = L;
+
     for (int i = 0; i < faces.length(); i++) {
         for (int j = 0; j < faces[i].vertices.length(); j++) {
-            faces[i].vertices[j] = this->R.inverted() * faces[i].vertices[j];;
+            faces[i].vertices[j] = this->R.inverted() * faces[i].vertices[j];
             faces[i].vertices[j] = R * faces[i].vertices[j];
             faces[i].vertices[j] += (c - this->c);
         }
@@ -111,9 +129,17 @@ void Polyhedron::setState(QVector3D c, QVector3D p, QMatrix4x4 R, QVector3D L)
 
 void Polyhedron::underWater(double zWater)
 {
+    /*for (auto& edge : faces) {
+        cout << "Edge" << endl;
+        for (auto& v : edge.vertices)
+            cout << vtos(v) << endl;
+    }*/
+
     QVector<QVector<QVector3D>> waterlineVertices;
+    waterlineVertices.resize(faces.length());
     QVector<Edge> newFaces;
     for (int i = 0; i < faces.length(); i++) {
+        waterlineVertices[i].resize(2);
         QVector<QVector3D> vertices;
         for (int j = 0; j < faces[i].vertices.length(); j++) {
             int ifirst = 0, ilast =0;
@@ -139,28 +165,38 @@ void Polyhedron::underWater(double zWater)
                 }
                 vertices.append(QVector3D(faces[i].vertices[j]));
             }
-            if (ifirst > ilast) {
+            /*if (ifirst > ilast) {
                 QVector3D tmp = waterlineVertices[i][0];
                 waterlineVertices[i][0] = waterlineVertices[i][1];
                 waterlineVertices[i][1] = tmp;
-            }
+            }*/
         }
         if (vertices.length() > 0) {
             Edge newFace;
             newFace.vertices = vertices;
             newFaces.append(newFace);
         }
-        if (waterlineVertices.length() > 0) {
-            Edge newEdge = createWaterlineEdge(waterlineVertices);
-            if (newEdge.vertices.length() > 0) {
-                newFaces.append(newEdge);
-            }
+    }
+    if (waterlineVertices.length() > 0) {
+        Edge newEdge = createWaterlineEdge(waterlineVertices);
+        if (newEdge.vertices.length() > 0) {
+            newFaces.append(newEdge);
         }
     }
+    /*
+    cout << "100" << endl;
+    for (auto& edge : newFaces) {
+        cout << "Edge " << edge.vertices.length() << endl;
+    }*/
     Polyhedron * uw = new Polyhedron(newFaces, density);
     float volume = uw->mass / uw->density;
     Farch = DENSITY_OF_WATER * G * volume * QVector3D(0, 0, 1);
     cUnderWater = uw->c;
+    /*
+    cout << "10" << endl;
+    for (auto& edge : faces) {
+        cout << "Edge " << edge.vertices.length() << endl;
+    }*/
     delete uw;
 }
 
@@ -168,6 +204,11 @@ Edge Polyhedron::createWaterlineEdge(QVector<QVector<QVector3D>> waterlineVertic
 {
     Edge newEdge;
     QVector<QVector3D> vertices;
+    //vertices.resize(waterlineVertices.length() * 2);
+    /*for (int i = 0; i < waterlineVertices.length(); i++) {
+        cout << waterlineVertices[i].length() << endl;
+        cout << vtos(waterlineVertices[i][0]) << ";" << vtos(waterlineVertices[i][1]) << endl;
+    }*/
     for (int i = 0; i < waterlineVertices.length(); i++) {
         if (waterlineVertices[i][0] == waterlineVertices[i][1]) {
             waterlineVertices.remove(i);
@@ -178,7 +219,7 @@ Edge Polyhedron::createWaterlineEdge(QVector<QVector<QVector3D>> waterlineVertic
             break;
         }
     }
-    while (vertices.first() != vertices.last() || waterlineVertices.length() > 0) {
+    while (vertices.first() != vertices.last() && waterlineVertices.length() > 0) {
         for (int i = 0; i < waterlineVertices.length(); i++) {
             if (waterlineVertices[i][0] == waterlineVertices[i][1]) {
                 waterlineVertices.remove(i);

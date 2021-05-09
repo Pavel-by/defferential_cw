@@ -1,7 +1,9 @@
 ﻿#ifndef INTEGRALCALCULATOR_H
 #define INTEGRALCALCULATOR_H
 
+#include <QMatrix4x4>
 #include "polyhedron.h"
+
 
 #define X 0
 #define Y 1
