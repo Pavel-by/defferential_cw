@@ -1,4 +1,4 @@
-#include "figure.h"
+﻿#include "figure.h"
 #include <iostream>
 
 Figure::Figure():QObject()
@@ -38,6 +38,7 @@ void Figure::initialize() {
 
 void Figure::paint() {
     allocateBuffers();
+    glColor3f(1,0,0);
     glBindVertexArray(_vao);
     glDrawElements(GL_TRIANGLES, _indicesBuffer.size(), GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);

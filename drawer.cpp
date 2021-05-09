@@ -1,5 +1,6 @@
-#include "cube.h"
+﻿#include "cube.h"
 #include "drawer.h"
+#include "iceberg.h"
 #include <QMatrix3x3>
 #include <QMouseEvent>
 #include <QRandomGenerator>
@@ -18,6 +19,13 @@ Drawer::Drawer(QWidget *parent) : QOpenGLWidget(parent)
     QRandomGenerator *generator = QRandomGenerator::global();
 
     for (Figure* f : _figures) {
+        QObject::connect(f, SIGNAL(changed()), this, SLOT(depenceChanged()));
+    }
+
+    Iceberg* iceb = new Iceberg();
+    _figures.append(iceb);
+
+    for (Figure* f: _figures) {
         QObject::connect(f, SIGNAL(changed()), this, SLOT(depenceChanged()));
     }
 
