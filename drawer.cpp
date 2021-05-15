@@ -1,55 +1,48 @@
 ﻿#include "cube.h"
 #include "drawer.h"
-#include "iceberg.h"
 #include <QMatrix3x3>
 #include <QMouseEvent>
 #include <QRandomGenerator>
 #include <QWheelEvent>
 #include <iostream>
+#include <simulation/iceberg.h>
 
 Drawer::Drawer(QWidget *parent) : QOpenGLWidget(parent)
 {
     setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
     QObject::connect(&_viewWrapper, SIGNAL(changed()), this, SLOT(depenceChanged()));
+    QObject::connect(&_figureWrapper, SIGNAL(changed()), this, SLOT(depenceChanged()));
 
-    float minTranslate = -10, maxTranslate = 10;
-    float minRotate = 0, maxRotate = 360;
-
-    QRandomGenerator *generator = QRandomGenerator::global();
-
-    for (Figure* f : _figures) {
-        QObject::connect(f, SIGNAL(changed()), this, SLOT(depenceChanged()));
-    }
-
-    Iceberg* iceb = new Iceberg();
-    _figures.append(iceb);
-
-    for (Figure* f: _figures) {
-        QObject::connect(f, SIGNAL(changed()), this, SLOT(depenceChanged()));
-    }
-
-    /*for (int i = 0; i < 1; i++) {
-        Figure *figure = new Cube();
-        figure->translate(
-                    QVector3D(
-                        static_cast<float>(generator->generateDouble()) * (maxTranslate - minTranslate) + minTranslate,
-                        static_cast<float>(generator->generateDouble()) * (maxTranslate - minTranslate) + minTranslate,
-                        static_cast<float>(generator->generateDouble()) * (maxTranslate - minTranslate) + minTranslate
-                        ));
-        figure->rotate(
-                    static_cast<float>(generator->generateDouble()) * (maxRotate - minRotate) + minRotate,
-                    QVector3D(
-                        static_cast<float>(generator->generateDouble()) * 2 - 1,
-                        static_cast<float>(generator->generateDouble()) * 2 - 1,
-                        static_cast<float>(generator->generateDouble()) * 2 - 1
-                        ));
-        QObject::connect(figure, SIGNAL(changed()), this, SLOT(depenceChanged()));
-        _figures.append(figure);
-    }*/
+    _figureWrapper.viewWrapper = &_viewWrapper;
+    _lights = {
+        &LightConfig::base,
+        &LightConfig::baseReversed,
+    };
 }
 
 Drawer::~Drawer() {
+}
+
+void Drawer::addFigure(Figure *figure) {
+    _figures.append(figure);
+    QObject::connect(figure, SIGNAL(changed()), this, SLOT(depenceChanged()));
+
+    if (isValid()) {
+        makeCurrent();
+        figure->attach(context());
+    }
+}
+
+bool Drawer::removeFigure(Figure *figure) {
+    if (!_figures.removeOne(figure)) {
+        return false;
+    }
+
+    makeCurrent();
+    figure->detach();
+    QObject::disconnect(figure, SIGNAL(changed()), this, SLOT(depenceChanged()));
+    return true;
 }
 
 void Drawer::depenceChanged() {
@@ -57,10 +50,11 @@ void Drawer::depenceChanged() {
 }
 
 void Drawer::initializeGL() {
-    initializeOpenGLFunctions();
-    glClearColor(1, 1, 1, 1);
+    auto funcs = getFuncs();
+    funcs->initializeOpenGLFunctions();
+    funcs->glClearColor(1, 1, 1, 1);
     for (Figure* figure : _figures) {
-        figure->initialize();
+        figure->attach(context());
     }
 }
 
@@ -78,27 +72,38 @@ void writeColor(float* to, const QColor& color) {
 }
 
 void Drawer::paintGL() {
-    glClearColor(1, 1, 1, 1);
-    glEnable(GL_ALPHA_TEST);
-    glEnable(GL_DEPTH_TEST);
+    auto funcs = getFuncs();
+    funcs->glClearColor(1, 1, 1, 1);
+    funcs->glEnable(GL_ALPHA_TEST);
+    funcs->glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_NORMALIZE);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    funcs->glEnable(GL_BLEND);
+    funcs->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glFrontFace(GL_CCW);
+    funcs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    funcs->glFrontFace(GL_CW);
 
+    funcs->glMatrixMode(GL_MODELVIEW);
     QMatrix4x4 view = _viewWrapper.matrix();
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf(view.constData());
+    funcs->glLoadMatrixf(view.constData());
 
+    funcs->glMatrixMode(GL_PROJECTION);
+    funcs->glLoadIdentity();
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(projPerspective.constData());
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
+
+    for (auto light : _lights)
+        light->use(context());
+
+    funcs->glMatrixMode(GL_PROJECTION);
+    funcs->glLoadIdentity();
+    funcs->glLoadMatrixf(projPerspective.constData());
 
     for (Figure* figure : _figures) {
-        glMatrixMode(GL_MODELVIEW);
-        glLoadMatrixf((view * figure->model()).constData());
+        funcs->glMatrixMode(GL_MODELVIEW);
+        funcs->glLoadMatrixf((view * figure->model()).constData());
 
         figure->paint();
     }
@@ -108,18 +113,21 @@ void Drawer::paintGL() {
 void Drawer::mouseMoveEvent(QMouseEvent* event) {
     event->setAccepted(false);
     _viewWrapper.mouseMoveEvent(event);
+    _figureWrapper.mouseMoveEvent(event);
     event->accept();
 }
 
 void Drawer::mousePressEvent(QMouseEvent* event) {
     event->setAccepted(false);
     _viewWrapper.mousePressEvent(event);
+    _figureWrapper.mousePressEvent(event);
     event->accept();
 }
 
 void Drawer::mouseReleaseEvent(QMouseEvent *event) {
     event->setAccepted(false);
     _viewWrapper.mouseReleaseEvent(event);
+    _figureWrapper.mouseReleaseEvent(event);
     event->accept();
 }
 
@@ -129,4 +137,21 @@ void Drawer::keyPressEvent(QKeyEvent *event) {
 
 void Drawer::keyReleaseEvent(QKeyEvent *event) {
     _viewWrapper.keyReleaseEvent(event);
+}
+
+QOpenGLFunctions_3_3_Compatibility* Drawer::getFuncs() {
+    auto funcs = context()->versionFunctions<QOpenGLFunctions_3_3_Compatibility>();
+    if (!funcs) {
+        qDebug() << "Vertions functions are null\n";
+        exit(1);
+    }
+    return funcs;
+}
+
+FigureWrapper& Drawer::figureWrapper() {
+    return _figureWrapper;
+}
+
+ViewMatrixWrapper& Drawer::viewWrapper() {
+    return _viewWrapper;
 }

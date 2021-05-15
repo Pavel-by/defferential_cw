@@ -154,6 +154,7 @@ void Polyhedron::underWater(double zWater)
                 ifirst = (j + 1) % faces[i].vertices.length();
             }
             if (curr.z() <= zWater) {
+                vertices.append(QVector3D(faces[i].vertices[j]));
                 if (next.z() > zWater) {
                     float lambda = (zWater - curr.z()) / (next.z() - curr.z());
                     QVector3D intersec(curr.x() + (next.x() - curr.x())*lambda,
@@ -163,7 +164,6 @@ void Polyhedron::underWater(double zWater)
                     vertices.append(intersec);
                     ilast = j;
                 }
-                vertices.append(QVector3D(faces[i].vertices[j]));
             }
             /*if (ifirst > ilast) {
                 QVector3D tmp = waterlineVertices[i][0];
@@ -210,8 +210,8 @@ Edge Polyhedron::createWaterlineEdge(QVector<QVector<QVector3D>> waterlineVertic
         cout << vtos(waterlineVertices[i][0]) << ";" << vtos(waterlineVertices[i][1]) << endl;
     }*/
     for (int i = 0; i < waterlineVertices.length(); i++) {
-        if (waterlineVertices[i][0] == waterlineVertices[i][1]) {
-            waterlineVertices.remove(i);
+        if (isSamePoint(waterlineVertices[i][0], waterlineVertices[i][1])) {
+            continue;
         } else {
             vertices.append(waterlineVertices[i][0]);
             vertices.append(waterlineVertices[i][1]);
@@ -219,11 +219,14 @@ Edge Polyhedron::createWaterlineEdge(QVector<QVector<QVector3D>> waterlineVertic
             break;
         }
     }
+    if (vertices.length() == 0) {
+        return {};
+    }
     while (vertices.first() != vertices.last() && waterlineVertices.length() > 0) {
         for (int i = 0; i < waterlineVertices.length(); i++) {
-            if (waterlineVertices[i][0] == waterlineVertices[i][1]) {
+            if (isSamePoint(waterlineVertices[i][0], waterlineVertices[i][1])) {
                 waterlineVertices.remove(i);
-            } else if (vertices.last() == waterlineVertices[i][0]) {
+            } else if (isSamePoint(vertices.last(), waterlineVertices[i][0])) {
                 vertices.append(waterlineVertices[i][1]);
                 waterlineVertices.remove(i);
                 break;
@@ -237,4 +240,19 @@ Edge Polyhedron::createWaterlineEdge(QVector<QVector<QVector3D>> waterlineVertic
     }
     newEdge.vertices = vertices;
     return newEdge;
+}
+
+const QMatrix4x4& Polyhedron::getR() {
+    return R;
+}
+
+const QVector3D& Polyhedron::getC() {
+    return c;
+}
+bool Polyhedron::isSamePoint(float first, float second) {
+    return std::abs(first - second) < 0.000001f;
+}
+
+bool Polyhedron::isSamePoint(const QVector3D& first, const QVector3D& second) {
+    return isSamePoint(first.distanceToPoint(second), 0.0f);
 }

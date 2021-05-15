@@ -4,11 +4,14 @@
 #include "figure.h"
 #include "viewmatrixwrapper.h"
 
+#include <figurewrapper.h>
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
 
-class Drawer : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
+#include <light/lightconfig.h>
+
+class Drawer : public QOpenGLWidget
 {
     Q_OBJECT
 
@@ -17,6 +20,12 @@ public:
     ~Drawer() override;
 
     QMatrix4x4 projPerspective;
+
+    void addFigure(Figure *figure);
+    bool removeFigure(Figure *figure);
+
+    FigureWrapper& figureWrapper();
+    ViewMatrixWrapper& viewWrapper();
 
 private slots:
     void depenceChanged();
@@ -36,10 +45,11 @@ protected:
     void keyReleaseEvent(QKeyEvent *event) override;
 
 private:
-    QVector<Figure*> _figures;
+    QList<Figure*> _figures;
     ViewMatrixWrapper _viewWrapper;
-    QVector4D _lightPosition;
-    QVector4D _lightDirection;
-    QVector3D _lightSpotDirection;
+    FigureWrapper _figureWrapper;
+    QList<LightConfig*> _lights;
+
+    QOpenGLFunctions_3_3_Compatibility* getFuncs();
 };
 

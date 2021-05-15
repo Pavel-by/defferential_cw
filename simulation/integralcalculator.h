@@ -1,4 +1,4 @@
-﻿#ifndef INTEGRALCALCULATOR_H
+#ifndef INTEGRALCALCULATOR_H
 #define INTEGRALCALCULATOR_H
 
 #include <QMatrix4x4>

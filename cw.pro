@@ -11,29 +11,48 @@ CONFIG += c++11
 SOURCES += \
     cube.cpp \
     drawer.cpp \
+    edit/editwindow.cpp \
     figure.cpp \
-    iceberg.cpp \
-    integralcalculator.cpp \
+    figurewrapper.cpp \
+    figureloader.cpp \
+    light/lightconfig.cpp \
+    light/materialconfig.cpp \
     main.cpp \
     mainwindow.cpp \
-    polyhedron.cpp \
-    shaderprogramwrapper.cpp \
+    simulation/iceberg.cpp \
+    simulation/integralcalculator.cpp \
+    simulation/polyhedron.cpp \
+    simulation/simulationwindow.cpp \
+    simulation/water.cpp \
+    utils/figureserializer.cpp \
+    utils/verticesstretcher.cpp \
     viewmatrixwrapper.cpp
 
 HEADERS += \
     cube.h \
     drawer.h \
+    edit/editwindow.h \
     figure.h \
-    iceberg.h \
-    integralcalculator.h \
+    figurewrapper.h \
+    light/lightconfig.h \
+    light/materialconfig.h \
     log.h \
+    figureloader.h \
     mainwindow.h \
-    polyhedron.h \
-    shaderprogramwrapper.h \
+    simulation/iceberg.h \
+    simulation/integralcalculator.h \
+    simulation/polyhedron.h \
+    simulation/simulationwindow.h \
+    simulation/water.h \
+    utils/figureserializer.h \
+    utils/verticesstretcher.h \
     viewmatrixwrapper.h
 
 FORMS += \
-    mainwindow.ui
+    editwindow.ui \
+    figureloader.ui \
+    mainwindow.ui \
+    simulationwindow.ui
 
 LIBS += -lopengl32 -lglu32
 

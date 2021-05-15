@@ -7,41 +7,74 @@ Figure::Figure():QObject()
 }
 
 Figure::~Figure() {
-    if (_vao) glDeleteVertexArrays(1, &_vao);
-    if (_vbo) glDeleteBuffers(1, &_vbo);
-    if (_veo) glDeleteBuffers(1, &_veo);
+    if (isAttached())
+        detach();
 }
 
-void Figure::initialize() {
-    initializeOpenGLFunctions();
+QOpenGLFunctions_3_3_Compatibility *Figure::getFuncs() {
+    auto funcs = context->versionFunctions<QOpenGLFunctions_3_3_Compatibility>();
+    if (!funcs) {
+        qDebug() << "Vertions functions are null\n";
+        exit(1);
+    }
+    return funcs;
+}
 
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
-    glGenBuffers(1, &_veo);
+void Figure::attach(QOpenGLContext *context) {
+    assert(this->context == nullptr);
+    this->context = context;
 
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _veo);
+    auto funcs = getFuncs();
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, sizeof(VertexData), 0);
+    //gl->initializeOpenGLFunctions();
 
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glNormalPointer(GL_FLOAT, sizeof(VertexData), reinterpret_cast<GLvoid*>(sizeof(QVector3D)));
+    funcs->glGenVertexArrays(1, &_vao);
+    funcs->glGenBuffers(1, &_vbo);
+    funcs->glGenBuffers(1, &_veo);
 
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
+    funcs->glBindVertexArray(_vao);
+    funcs->glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _veo);
+
+    funcs->glEnableClientState(GL_VERTEX_ARRAY);
+    funcs->glVertexPointer(3, GL_FLOAT, sizeof(VertexData), 0);
+
+    funcs->glEnableClientState(GL_NORMAL_ARRAY);
+    funcs->glNormalPointer(GL_FLOAT, sizeof(VertexData), reinterpret_cast<GLvoid*>(sizeof(QVector3D)));
+
+    funcs->glBindVertexArray(0);
+    funcs->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    funcs->glDisableClientState(GL_VERTEX_ARRAY);
+    funcs->glDisableClientState(GL_NORMAL_ARRAY);
 }
 
 void Figure::paint() {
+    auto funcs = getFuncs();
+
+    for (MaterialConfig *config : materials) {
+        config->use(context);
+    }
+
     allocateBuffers();
-    glColor3f(1,0,0);
-    glBindVertexArray(_vao);
-    glDrawElements(GL_TRIANGLES, _indicesBuffer.size(), GL_UNSIGNED_INT, nullptr);
-    glBindVertexArray(0);
+    funcs->glColor3f(1,0,0);
+    funcs->glBindVertexArray(_vao);
+    funcs->glDrawElements(GL_TRIANGLES, _indicesBuffer.size(), GL_UNSIGNED_INT, nullptr);
+    funcs->glBindVertexArray(0);
+}
+
+void Figure::detach() {
+    assert(isAttached());
+    auto funcs = getFuncs();
+    funcs->glDeleteVertexArrays(1, &_vao);
+    funcs-> glDeleteBuffers(1, &_vbo);
+    funcs->glDeleteBuffers(1, &_veo);
+    context = nullptr;
+    markVertexChanged();
+}
+
+bool Figure::isAttached() {
+    return context != nullptr;
 }
 
 void Figure::allocateBuffers() {
@@ -74,23 +107,19 @@ void Figure::allocateBuffers() {
         for (const QVector3D& vertex : edge.vertices) {
             _verticesBuffer[vertexPosition++] = {
                 vertex,
-                -normal
-                //(normalMatrix * normal).normalized()
+                -normal//(normalMatrix * normal).normalized()
             };
         }
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, _verticesBuffer.size() * sizeof(VertexData), _verticesBuffer.constData(), GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    auto funcs = getFuncs();
+    funcs->glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    funcs->glBufferData(GL_ARRAY_BUFFER, _verticesBuffer.size() * sizeof(VertexData), _verticesBuffer.constData(), GL_DYNAMIC_DRAW);
+    funcs->glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _veo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicesBuffer.size() * sizeof(GLuint), _indicesBuffer.constData(), GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-void Figure::translateIdentity() {
-    _modelTranslate = QMatrix4x4();
+    funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _veo);
+    funcs->glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicesBuffer.size() * sizeof(GLuint), _indicesBuffer.constData(), GL_DYNAMIC_DRAW);
+    funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Figure::markNeedsPaint() {
@@ -119,3 +148,8 @@ QMatrix4x4 Figure::model() const {
     return _modelTranslate * _modelRotation * _modelScale;
 }
 
+void Figure::clearModel() {
+    _modelRotation = QMatrix4x4();
+    _modelTranslate = QMatrix4x4();
+    _modelScale = QMatrix4x4();
+}

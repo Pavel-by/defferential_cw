@@ -29,6 +29,9 @@ private:
     void underWater(double zWater = 0);
     void setState(QVector3D c, QVector3D p, QMatrix4x4 R, QVector3D L);
 
+    bool isSamePoint(float value, float second);
+    bool isSamePoint(const QVector3D& first, const QVector3D& second);
+
 public:
     Polyhedron(QVector<Edge> faces, double density = 916.7);
 
@@ -36,5 +39,10 @@ public:
 	double density, mass;
 
     void computeNewState(float h);
+
+    const QMatrix4x4& model();
+
+    const QMatrix4x4& getR();
+    const QVector3D& getC();
 };
 

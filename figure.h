@@ -2,13 +2,12 @@
 
 #include <QMatrix4x4>
 #include <QObject>
-#include <QOpenGLBuffer>
-#include <QOpenGLVertexArrayObject>
 #include <QVector3D>
 #include <QVector>
-#include <QOpenGLShaderProgram>
-#include <QGLFunctions>
 #include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLFunctions_3_3_Compatibility>
+
+#include <light/materialconfig.h>
 
 struct VertexData {
     QVector3D vertex;
@@ -26,7 +25,7 @@ struct Edge {
     }
 };
 
-class Figure : public QObject, protected QOpenGLFunctions_3_3_Core
+class Figure : public QObject
 {
     Q_OBJECT
 
@@ -38,21 +37,26 @@ public:
     ~Figure() override;
 
     QVector<Edge> edges;
+    QList<MaterialConfig*> materials;
 
     QMatrix4x4 model() const;
 
-    void initialize();
+    void attach(QOpenGLContext *context);
     void paint();
+    void detach();
+    bool isAttached();
 
     void rotate(float angle, const QVector3D& vector);
     void scale(QVector3D vector);
     void translate(QVector3D vector);
-    void translateIdentity();
+    void clearModel();
 
     void markNeedsPaint();
     void markVertexChanged();
 
 private:
+    QOpenGLContext *context = nullptr;
+
     QMatrix4x4 _modelRotation;
     QMatrix4x4 _modelTranslate;
     QMatrix4x4 _modelScale;
@@ -70,5 +74,6 @@ private:
     bool _verticesChanged = true;
 
     void allocateBuffers();
+    QOpenGLFunctions_3_3_Compatibility *getFuncs();
 };
 
