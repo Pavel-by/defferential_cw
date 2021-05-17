@@ -41,6 +41,18 @@ QVector<Edge> VerticesStretcher::constructEdges(const QList<QVector3D>& inputVer
         edges.append(edge);
     }
 
+    for (int i = 0; i < edges.length();) {
+        int j;
+        for (j = i+1; j < edges.length(); j++) {
+            if (joinEdge(edges[j], edges[i]))
+                break;
+        }
+        if (j != edges.length())
+            edges.remove(i);
+        else
+            i++;
+    }
+
     return edges;
 }
 
@@ -116,6 +128,29 @@ void VerticesStretcher::finalizeEdge(const QList<QVector3D> &vertices, QMap<QVec
     markUsed(used, edge.vertices[2], edge.vertices[0]);
 }
 
+bool VerticesStretcher::joinEdge(Edge &e1, Edge &e2) {
+    for (int i = 0; i < e2.vertices.length(); i++) {
+        // test to be one plane
+        if (e2.vertices[i].distanceToPlane(e1.vertices[0], e1.vertices[1], e1.vertices[2]) != 0.0f)
+            return false;
+    }
+
+    for (int i1 = 0; i1 < e1.vertices.length(); i1++) {
+        auto& v1 = e1.vertices[i1 % e1.vertices.length()];
+        auto& v2 = e1.vertices[(i1 + 1) % e1.vertices.length()];
+
+        for (int i2 = 0; i2 < e2.vertices.length(); i2++) {
+            if (v2 == e2.vertices[i2 % e2.vertices.length()] && v1 == e2.vertices[(i2 + 1) % e2.vertices.length()]) {
+                for (int i = 2; i < e2.vertices.length(); i++) {
+                    e1.vertices.insert((i1 + i - 1) % e1.vertices.length(), e2.vertices[(i2 + i) % e2.vertices.length()]);
+                }
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool VerticesStretcher::validateVertices(const QList<QVector3D>& vertices) {
     if (vertices.size() < 4) {
         showDialog("Vertices count can not be less than 4");
@@ -127,8 +162,8 @@ bool VerticesStretcher::validateVertices(const QList<QVector3D>& vertices) {
 
     for (const QVector3D& vertice : vertices) {
         onePlane &= isSamePoint(vertice.distanceToPlane(
-                    vertices[0], vertices[1], vertices[2]
-                    ), 0.0f);
+                                    vertices[0], vertices[1], vertices[2]
+                ), 0.0f);
 
         if (!onePlane) break;
     }
