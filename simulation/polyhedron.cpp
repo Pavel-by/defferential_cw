@@ -101,9 +101,10 @@ QVector3D Polyhedron::calculateOmega() {
 
 QVector3D Polyhedron::calculateForces()
 {
+    QVector3D v = p;
     QVector3D mg = mass * G * QVector3D(0, 0, -1);
     underWater();
-    return mg + Farch;
+    return mg + Farch - 0.2*v;
 }
 
 QVector3D Polyhedron::calculateTau()
