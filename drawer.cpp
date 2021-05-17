@@ -61,7 +61,7 @@ void Drawer::initializeGL() {
 void Drawer::resizeGL(int w, int h) {
     float ratio = static_cast<float>(w) / static_cast<float>(h);
     projPerspective = QMatrix4x4();
-    projPerspective.perspective(45.0f, ratio, 0.1f, 100.0f);
+    projPerspective.perspective(45.0f, ratio, 0.1f, 2000.0f);
 }
 
 void writeColor(float* to, const QColor& color) {

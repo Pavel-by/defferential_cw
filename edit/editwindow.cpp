@@ -22,6 +22,8 @@ EditWindow::EditWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::EditWi
     QObject::connect(ui->launchSimulationButton, SIGNAL(clicked()), this, SLOT(launchSimulation()));
     QObject::connect(ui->loadFigureButton, SIGNAL(clicked()), this, SLOT(loadFigure()));
     QObject::connect(ui->saveFigureButton, SIGNAL(clicked()), this, SLOT(saveFigure()));
+    QObject::connect(ui->heightSlider, SIGNAL(valueChanged(int)), this, SLOT(heightChanged()));
+    heightChanged();
 }
 
 EditWindow::~EditWindow() {
@@ -39,9 +41,16 @@ void EditWindow::launchSimulation() {
 void EditWindow::loadFigure() {
     QString filename = QFileDialog::getOpenFileName(this, "Load figure");
     FigureSerializer().load(filename, _iceberg);
+    heightChanged();
 }
 
 void EditWindow::saveFigure() {
     QString filename = QFileDialog::getSaveFileName(this, "Load figure");
     FigureSerializer().save(_iceberg, filename);
+}
+
+void EditWindow::heightChanged() {
+    float height = static_cast<float>(ui->heightSlider->value()) / 10.0f;
+    _iceberg->setTranslate(QVector3D(0, 0, height));
+    _iceberg->markNeedsPaint();
 }

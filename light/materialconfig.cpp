@@ -11,8 +11,8 @@ MaterialConfig MaterialConfig::waterFront = {
 };
 MaterialConfig MaterialConfig::waterBack = {
     GL_BACK,
-    QColor(9, 47, 13, 0),
-    QColor(66, 255, 14, 0),
+    QColor(9, 47, 13, 50),
+    QColor(66, 255, 14, 50),
     QColor(48, 161, 0, 0),
     QColor(),
     50,

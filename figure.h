@@ -49,6 +49,7 @@ public:
     void rotate(float angle, const QVector3D& vector);
     void scale(QVector3D vector);
     void translate(QVector3D vector);
+    void setTranslate(QVector3D vector);
     void clearModel();
 
     void markNeedsPaint();

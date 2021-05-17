@@ -153,3 +153,8 @@ void Figure::clearModel() {
     _modelTranslate = QMatrix4x4();
     _modelScale = QMatrix4x4();
 }
+
+void Figure::setTranslate(QVector3D vector) {
+    _modelTranslate = QMatrix4x4();
+    _modelTranslate.translate(vector);
+}
