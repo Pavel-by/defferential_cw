@@ -15,17 +15,19 @@ private slots:
     void tick();
 
 public:
-    Iceberg();
+    Iceberg(Polyhedron* poly = nullptr);
     ~Iceberg() override;
 
     void stepForward(float step);
 
     void startTimer();
     void pauseTimer();
-    void startSimulation();
+    Polyhedron* generatePoly();
+
+    void loadDefaultFigure();
 
 private:
-    Polyhedron* poly = nullptr;
+    Polyhedron* _poly = nullptr;
     QTimer timer;
     clock_t _lastTime = 0;
 };

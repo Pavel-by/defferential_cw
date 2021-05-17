@@ -12,15 +12,15 @@ FigureSerializer::FigureSerializer()
 void FigureSerializer::load(const QString& filename, Figure* figure) {
     QFile file(filename);
 
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    if (!file.open(QIODevice::ReadOnly)) {
         showDialog("Failed to open file");
         return;
     }
 
-    QDataStream in(&file);
+    QTextStream in(&file);
 
     QList<QVector3D> vertices;
-    int count;
+    qint32 count = 0;
 
     in >> count;
 
@@ -28,7 +28,7 @@ void FigureSerializer::load(const QString& filename, Figure* figure) {
         float x, y, z;
         in >> x >> y >> z;
 
-        if (in.status() == QDataStream::ReadCorruptData) {
+        if (in.status() == QTextStream::ReadCorruptData) {
             showDialog("File contains corrupted data");
             return;
         }
@@ -63,7 +63,18 @@ void FigureSerializer::load(const QString& filename, Figure* figure) {
         }
     }
 
+    QVector3D diff = max - min;
+
+    for (Edge& edge : edges) {
+        for (QVector3D& v : edge.vertices) {
+            v /= diff;
+        }
+    }
+
     figure->edges = edges;
+    figure->clearModel();
+    figure->markVertexChanged();
+    figure->markNeedsPaint();
 }
 
 void FigureSerializer::save(Figure *figure, const QString& filename) {
@@ -82,7 +93,7 @@ void FigureSerializer::save(Figure *figure, const QString& filename) {
                 vertices.append(vertice);
     }
 
-    QDataStream out(&file);
+    QTextStream out(&file);
 
     out << vertices.size() << " ";
     for (const QVector3D& vertice : vertices)

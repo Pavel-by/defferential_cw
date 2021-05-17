@@ -9,7 +9,6 @@ public:
 
     VerticesStretcher();
 
-    QVector<Edge> load(const QString& filename);
     QVector<Edge> constructEdges(const QList<QVector3D>& vertices);
 
 private:

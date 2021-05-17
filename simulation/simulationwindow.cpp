@@ -3,19 +3,20 @@
 
 #include <drawer.h>
 
-SimulationWindow::SimulationWindow(Iceberg* iceberg, QWidget *parent) : QMainWindow(parent), ui(new Ui::SimulationWindow)
+SimulationWindow::SimulationWindow(Polyhedron* poly, QWidget *parent) : QMainWindow(parent), ui(new Ui::SimulationWindow)
 {
+    setWindowTitle("Simulation");
     drawer = new Drawer();
 
     ui->setupUi(static_cast<QMainWindow*>(this));
     ui->verticalLayout->addWidget(drawer, 1);
 
-    _iceberg = iceberg;
+    _iceberg = new Iceberg(poly);
     _water = new Water();
     drawer->addFigure(_iceberg);
     drawer->addFigure(_water);
     QObject::connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(stepForward()));
-    _iceberg->startSimulation();
+    _iceberg->startTimer();
 }
 
 SimulationWindow::~SimulationWindow() {

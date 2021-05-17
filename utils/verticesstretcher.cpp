@@ -11,37 +11,6 @@ VerticesStretcher::VerticesStretcher()
 
 }
 
-QVector<Edge> VerticesStretcher::load(const QString& filename) {
-    QFile file(filename);
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        showDialog("Failed to open file");
-        return {};
-    }
-
-    QDataStream in(&file);
-
-    QList<QVector3D> vertices;
-    int count;
-
-    in >> count;
-
-    for (int i = 0; i < count; i++) {
-        float x, y, z;
-        in >> x >> y >> z;
-
-        if (in.status() == QDataStream::ReadCorruptData) {
-            showDialog("File contains corrupted data");
-            return {};
-        }
-
-        vertices.append(QVector3D(x, y, z));
-    }
-
-    file.close();
-    return constructEdges(vertices);
-}
-
 QVector<Edge> VerticesStretcher::constructEdges(const QList<QVector3D>& inputVertices) {
     QList<QVector3D> vertices;
     for (const QVector3D& vertice : inputVertices) {

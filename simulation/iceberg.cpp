@@ -1,7 +1,28 @@
 ﻿#include "iceberg.h"
 
-Iceberg::Iceberg()
+Iceberg::Iceberg(Polyhedron* poly)
 {
+    timer.setInterval(20);
+    materials = {
+        &MaterialConfig::iceberg,
+        &MaterialConfig::icebergBack,
+    };
+    QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+
+    if (poly != nullptr) {
+        assert(!poly->faces.isEmpty());
+        _poly = poly;
+        edges = poly->faces;
+    } else {
+        loadDefaultFigure();
+    }
+}
+
+Iceberg::~Iceberg() {
+
+}
+
+void Iceberg::loadDefaultFigure() {
     QVector<QVector3D> vertices = {
         QVector3D(1, 1, -1),
         QVector3D(-1, 1, -1),
@@ -39,13 +60,6 @@ Iceberg::Iceberg()
           verticesData[5],
           verticesData[4]}},
     };
-    timer.setInterval(20);
-    materials = {
-        &MaterialConfig::iceberg,
-        &MaterialConfig::icebergBack,
-    };
-    QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
-
     for (Edge& edge : edges) {
         QVector<QVector3D> reversed;
         reversed.resize(edge.vertices.length());
@@ -55,21 +69,19 @@ Iceberg::Iceberg()
         }
         edge.vertices = reversed;
     }
-}
-
-Iceberg::~Iceberg() {
-
+    scale(QVector3D(0.5f, 0.5f, 0.5f));
 }
 
 void Iceberg::stepForward(float step) {
-    poly->computeNewState(step);
-    edges = poly->faces;
+    assert(_poly != nullptr);
+    _poly->computeNewState(step);
+    edges = _poly->faces;
     markVertexChanged();
     markNeedsPaint();
 }
 
 void Iceberg::startTimer() {
-    assert(poly != nullptr);
+    assert(_poly != nullptr);
     _lastTime = 0;
     timer.start();
 }
@@ -80,6 +92,9 @@ void Iceberg::pauseTimer() {
 }
 
 void Iceberg::tick() {
+    if (_poly == nullptr)
+        return;
+
     if (_lastTime == 0) {
         _lastTime = clock();
         return;
@@ -88,19 +103,18 @@ void Iceberg::tick() {
     clock_t now = clock();
     float diff = static_cast<float>(now - _lastTime) / CLOCKS_PER_SEC;
     _lastTime = now;
-    stepForward(diff / 10);
+    stepForward(diff);
 }
 
-void Iceberg::startSimulation() {
-    assert(poly == nullptr);
-    for (Edge& edge : edges) {
+Polyhedron* Iceberg::generatePoly() {
+    QVector<Edge> convertedEdges = edges;
+    for (Edge& edge : convertedEdges) {
         for (QVector3D& v : edge.vertices) {
             v = model() * v;
         }
     }
-    clearModel();
-    poly = new Polyhedron(edges);
-    startTimer();
+    auto poly = new Polyhedron(convertedEdges);
+    return poly;
 }
 
 

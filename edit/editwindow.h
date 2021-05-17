@@ -21,6 +21,8 @@ public:
 
 public slots:
     void launchSimulation();
+    void loadFigure();
+    void saveFigure();
 
 protected:
     Ui::EditWindow *ui;

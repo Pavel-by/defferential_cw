@@ -18,7 +18,7 @@ public slots:
     void stepForward();
 
 public:
-    explicit SimulationWindow(Iceberg* iceberg, QWidget *parent = nullptr);
+    explicit SimulationWindow(Polyhedron* poly, QWidget *parent = nullptr);
     ~SimulationWindow() override;
 
 protected:
