@@ -22,6 +22,7 @@ SOURCES += \
     simulation/iceberg.cpp \
     simulation/integralcalculator.cpp \
     simulation/polyhedron.cpp \
+    simulation/quaternion.cpp \
     simulation/simulationwindow.cpp \
     simulation/water.cpp \
     utils/figureserializer.cpp \
@@ -42,6 +43,7 @@ HEADERS += \
     simulation/iceberg.h \
     simulation/integralcalculator.h \
     simulation/polyhedron.h \
+    simulation/quaternion.h \
     simulation/simulationwindow.h \
     simulation/water.h \
     utils/figureserializer.h \
