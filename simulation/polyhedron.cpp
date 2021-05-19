@@ -42,29 +42,29 @@ void Polyhedron::computeNewState(float h) {
         k4 = x_dot(x + h*k3)
     */
     QVector3D cNew, pNew, LNew;
-    QMatrix4x4 RNew;
+    Quaternion qNew;
 
     QVector3D k1_c, k1_p, k1_L;
-    QMatrix4x4 k1_R;
-    x_dot(c, p, R, L, k1_c, k1_p, k1_R, k1_L);
+    Quaternion k1_q;
+    x_dot(c, p, q, L, k1_c, k1_p, k1_q, k1_L);
 
     QVector3D k2_c, k2_p, k2_L;
-    QMatrix4x4 k2_R;
-    x_dot(c + h/2*k1_c, p + h/2*k1_p, R + h/2*k1_R, L + h/2*k1_L, k2_c, k2_p, k2_R, k2_L);
+    Quaternion k2_q;
+    x_dot(c + h/2*k1_c, p + h/2*k1_p, q + h/2*k1_q, L + h/2*k1_L, k2_c, k2_p, k2_q, k2_L);
 
     QVector3D k3_c, k3_p, k3_L;
-    QMatrix4x4 k3_R;
-    x_dot(c + h/2*k2_c, p + h/2*k2_p, R + h/2*k2_R, L + h/2*k2_L, k3_c, k3_p, k3_R, k3_L);
+    Quaternion k3_q;
+    x_dot(c + h/2*k2_c, p + h/2*k2_p, q + h/2*k2_q, L + h/2*k2_L, k3_c, k3_p, k3_q, k3_L);
 
     QVector3D k4_c, k4_p, k4_L;
-    QMatrix4x4 k4_R;
-    x_dot(c + h*k3_c, p + h*k3_p, R + h*k3_R, L + h*k3_L, k4_c, k4_p, k4_R, k4_L);
+    Quaternion k4_q;
+    x_dot(c + h*k3_c, p + h*k3_p, q + h*k3_q, L + h*k3_L, k4_c, k4_p, k4_q, k4_L);
 
     cNew = c + h*(k1_c/6 + k2_c/3 + k3_c/3 + k4_c/6);
     pNew = p + h*(k1_p/6 + k2_p/3 + k3_p/3 + k4_p/6);
-    RNew = R + h*(k1_R/6.0f + k2_R/3.0f + k3_R/3.0f + k4_R/6.0f);
+    qNew = q + h*(k1_q/6.0f + k2_q/3.0f + k3_q/3.0f + k4_q/6.0f);
     LNew = L + h*(k1_L/6 + k2_L/3 + k3_L/3 + k4_L/6);
-    setState(cNew, pNew, RNew, LNew);
+    setState(cNew, pNew, qNew, LNew);
 }
 
 QMatrix4x4 skewMatrix(QVector3D vec)
@@ -76,23 +76,24 @@ QMatrix4x4 skewMatrix(QVector3D vec)
     return QMatrix4x4(m);
 }
 
-void Polyhedron::x_dot(QVector3D c, QVector3D p, QMatrix4x4 R, QVector3D L, QVector3D& c_dot, QVector3D& p_dot, QMatrix4x4& R_dot, QVector3D& L_dot)
+void Polyhedron::x_dot(QVector3D c, QVector3D p, Quaternion q, QVector3D L, QVector3D& c_dot, QVector3D& p_dot, Quaternion& q_dot, QVector3D& L_dot)
 {
     Polyhedron * tmp = new Polyhedron(this->faces);
-    tmp->setState(c, p, R, L);
+    tmp->setState(c, p, q, L);
     c_dot = tmp->p/tmp->mass;
     p_dot = tmp->calculateForces();
     QVector3D tmpOmega = tmp->calculateOmega();
-    R_dot = skewMatrix(tmpOmega) * tmp->R;
+    Quaternion qOmega(0, tmpOmega);
+    q_dot = (qOmega * tmp->q) / 2;
     L_dot = tmp->calculateTau();
     delete tmp;
 }
 
 QVector3D Polyhedron::calculateOmega() {
-    //QMatrix4x4 Jcurr = R*J*R.transposed();
+    QMatrix4x4 Jcurr = R*J*R.transposed();
 
-    IntegralCalculator ic;
-    QMatrix4x4 Jcurr = ic.getInertiaTensor(this);
+    //IntegralCalculator ic;
+    //QMatrix4x4 Jcurr = ic.getInertiaTensor(this);
 
     QMatrix4x4 Jinv = Jcurr.inverted();
     QVector3D omega = Jinv * L;
@@ -112,13 +113,16 @@ QVector3D Polyhedron::calculateTau()
     if (Farch == QVector3D(0, 0, 0)) {
         return QVector3D(0, 0, 0);
     }
-    return QVector3D::crossProduct(cUnderWater - c, mass * G * QVector3D(0, 0, -1) + Farch);
+    return QVector3D::crossProduct(cUnderWater - c, mass * G * QVector3D(0, 0, -1) + Farch) - 0.2*L;
 }
 
-void Polyhedron::setState(QVector3D c, QVector3D p, QMatrix4x4 R, QVector3D L)
+void Polyhedron::setState(QVector3D c, QVector3D p, Quaternion q, QVector3D L)
 {
     this->p = p;
     this->L = L;
+    this->q = q;
+
+    QMatrix4x4 R = q.toMatrix();
 
     for (int i = 0; i < faces.length(); i++) {
         for (int j = 0; j < faces[i].vertices.length(); j++) {
