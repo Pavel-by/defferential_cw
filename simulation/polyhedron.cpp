@@ -121,8 +121,9 @@ void Polyhedron::setState(QVector3D c, QVector3D p, Quaternion q, QVector3D L)
     this->p = p;
     this->L = L;
     this->q = q;
+    this->q.normalize();
 
-    QMatrix4x4 R = q.toMatrix();
+    QMatrix4x4 R = this->q.toMatrix();
 
     for (int i = 0; i < faces.length(); i++) {
         for (int j = 0; j < faces[i].vertices.length(); j++) {

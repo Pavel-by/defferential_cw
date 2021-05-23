@@ -17,6 +17,7 @@ public:
     std::string toString() {
         return QString(QString::number(s) + " " + QString::number(v.x()) + " " + QString::number(v.y()) + " " + QString::number(v.z()) + " ").toUtf8().constData();
     }
+    void normalize();
     friend const Quaternion operator+(const Quaternion &q1, const Quaternion &q2);
     friend const Quaternion operator*(const Quaternion &q1, const Quaternion &q2);
     friend const Quaternion operator*(float factor, const Quaternion &quaternion);
