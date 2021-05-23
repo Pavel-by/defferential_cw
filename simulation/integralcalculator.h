@@ -1,4 +1,4 @@
-#ifndef INTEGRALCALCULATOR_H
+﻿#ifndef INTEGRALCALCULATOR_H
 #define INTEGRALCALCULATOR_H
 
 #include <QMatrix4x4>
@@ -31,9 +31,9 @@ private:
 
     void compProjectionIntegrals(Edge *f);
     void compFaceIntegrals(Edge *f);
-    void compVolumeIntegrals(Polyhedron *p);
 
 public:
+    void compVolumeIntegrals(Polyhedron *p);
     QMatrix4x4 getInertiaTensor(Polyhedron *p);
     QVector3D getCenterOfMass(Polyhedron *p);
     double getMass(Polyhedron *p);

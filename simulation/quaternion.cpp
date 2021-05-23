@@ -1,5 +1,6 @@
 ﻿#include "quaternion.h"
 #include <iostream>
+#include <math.h>
 
 Quaternion::Quaternion(float s, QVector3D v)
 {
@@ -29,6 +30,14 @@ QMatrix4x4 Quaternion::toMatrix()
                 2*b*d - 2*a*c, 2*c*d + 2*a*b, a*a - b*b - c*c + d*d, 0,
                 0, 0, 0, 1};
     return QMatrix4x4(r);
+}
+
+void Quaternion::normalize()
+{
+    float a = s, b = v.x(), c = v.y(), d = v.z();
+    float norm = std::sqrt(a*a + b*b + c*c + d*d);
+    this->s /= norm;
+    this->v /= norm;
 }
 
 const Quaternion operator+(const Quaternion &q1, const Quaternion &q2)
