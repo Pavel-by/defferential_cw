@@ -24,6 +24,7 @@ SOURCES += \
     simulation/polyhedron.cpp \
     simulation/quaternion.cpp \
     simulation/simulationwindow.cpp \
+    simulation/state.cpp \
     simulation/water.cpp \
     utils/figureserializer.cpp \
     utils/verticesstretcher.cpp \
@@ -45,6 +46,7 @@ HEADERS += \
     simulation/polyhedron.h \
     simulation/quaternion.h \
     simulation/simulationwindow.h \
+    simulation/state.h \
     simulation/water.h \
     utils/figureserializer.h \
     utils/verticesstretcher.h \
