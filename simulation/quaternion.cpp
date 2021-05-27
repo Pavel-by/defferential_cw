@@ -8,6 +8,13 @@ Quaternion::Quaternion(float s, QVector3D v)
     this->v = v;
 }
 
+Quaternion &Quaternion::operator=(const Quaternion &other)
+{
+    this->s = other.s;
+    this->v = other.v;
+    return *this;
+}
+
 Quaternion &Quaternion::operator*=(float factor)
 {
     this->s *= factor;

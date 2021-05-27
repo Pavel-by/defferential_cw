@@ -11,6 +11,7 @@ private:
     QVector3D v;
 public:
     Quaternion(float s = 1, QVector3D v = QVector3D(0, 0, 0));
+    Quaternion &operator=(const Quaternion &other);
     Quaternion &operator*=(float factor);
     Quaternion &operator+=(const Quaternion &other);
     QMatrix4x4 toMatrix();
