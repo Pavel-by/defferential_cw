@@ -31,26 +31,16 @@ QVector<Edge> VerticesStretcher::constructEdges(const QList<QVector3D>& inputVer
     QMap<QVector3D, QSet<QVector3D>> used;
     QVector<Edge> edges;
     Edge edge;
-    edge.vertices.resize(3);
+    edge.vertices.resize(2);
     prepareFirstEdge(vertices, edge);
     finalizeEdge(vertices, used, edge);
     edges.append(edge);
+    edge.vertices.resize(2);
 
     while (prepareEdge(used, edge)) {
         finalizeEdge(vertices, used, edge);
         edges.append(edge);
-    }
-
-    for (int i = 0; i < edges.length();) {
-        int j;
-        for (j = i+1; j < edges.length(); j++) {
-            if (joinEdge(edges[j], edges[i]))
-                break;
-        }
-        if (j != edges.length())
-            edges.remove(i);
-        else
-            i++;
+        edge.vertices.resize(2);
     }
 
     return edges;
@@ -101,10 +91,9 @@ void VerticesStretcher::markUsed(QMap<QVector3D, QSet<QVector3D>>& used, const Q
 }
 
 void VerticesStretcher::finalizeEdge(const QList<QVector3D> &vertices, QMap<QVector3D, QSet<QVector3D>> &used, Edge &edge) {
-    int i = 0;
     bool thirdInitialized = false;
 
-    for (;i < vertices.length(); i++) {
+    for (int i = 0; i < vertices.length(); i++) {
         const QVector3D& v = vertices[i];
 
         if (isSamePoint(edge.vertices[0], v) || isSamePoint(edge.vertices[1], v))
@@ -114,8 +103,8 @@ void VerticesStretcher::finalizeEdge(const QList<QVector3D> &vertices, QMap<QVec
             continue;
 
         if (!thirdInitialized) {
-            edge.vertices[2] = v;
             thirdInitialized = true;
+            edge.vertices.append(v);
             continue;
         }
 
@@ -123,32 +112,38 @@ void VerticesStretcher::finalizeEdge(const QList<QVector3D> &vertices, QMap<QVec
             edge.vertices[2] = v;
     }
 
-    markUsed(used, edge.vertices[0], edge.vertices[1]);
-    markUsed(used, edge.vertices[1], edge.vertices[2]);
-    markUsed(used, edge.vertices[2], edge.vertices[0]);
-}
+    QVector3D planeNormal = edge.normal();
+    edge.vertices.remove(2);
 
-bool VerticesStretcher::joinEdge(Edge &e1, Edge &e2) {
-    for (int i = 0; i < e2.vertices.length(); i++) {
-        // test to be one plane
-        if (e2.vertices[i].distanceToPlane(e1.vertices[0], e1.vertices[1], e1.vertices[2]) != 0.0f)
-            return false;
+    QList<QVector3D> planeVertices;
+    for (int i = 0; i < vertices.length(); i++) {
+        const QVector3D& v = vertices[i];
+        if (v.distanceToPlane(edge.vertices[0], planeNormal) == 0.0f)
+            planeVertices.append(v);
     }
 
-    for (int i1 = 0; i1 < e1.vertices.length(); i1++) {
-        auto& v1 = e1.vertices[i1 % e1.vertices.length()];
-        auto& v2 = e1.vertices[(i1 + 1) % e1.vertices.length()];
+    while (edge.vertices.first() != edge.vertices.last()) {
+        QVector3D startPoint = edge.vertices.last();
+        QVector3D compareVector = (edge.vertices.last() - edge.vertices[edge.vertices.length() - 2]).normalized();
+        QVector3D nearestPoint = startPoint - compareVector;
 
-        for (int i2 = 0; i2 < e2.vertices.length(); i2++) {
-            if (v2 == e2.vertices[i2 % e2.vertices.length()] && v1 == e2.vertices[(i2 + 1) % e2.vertices.length()]) {
-                for (int i = 2; i < e2.vertices.length(); i++) {
-                    e1.vertices.insert((i1 + i - 1) % e1.vertices.length(), e2.vertices[(i2 + i) % e2.vertices.length()]);
-                }
-                return true;
-            }
+        for (const QVector3D& v : planeVertices) {
+            if (isSamePoint(v, startPoint) || isSamePoint(v, edge.vertices.last()))
+                continue;
+
+            float currentCos = QVector3D::dotProduct(compareVector, (nearestPoint - startPoint).normalized());
+            float testCos = QVector3D::dotProduct(compareVector, (v - startPoint).normalized());
+            if (testCos > currentCos)
+                nearestPoint = v;
         }
+
+        edge.vertices.append(nearestPoint);
     }
-    return false;
+    edge.vertices.removeLast();
+
+    for (int i = 0; i < edge.vertices.length(); i++) {
+        markUsed(used, edge.vertices[i], edge.vertices[(i+1) % edge.vertices.length()]);
+    }
 }
 
 bool VerticesStretcher::validateVertices(const QList<QVector3D>& vertices) {

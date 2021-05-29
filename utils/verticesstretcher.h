@@ -22,7 +22,6 @@ private:
     bool isUsed(const QMap<QVector3D, QSet<QVector3D>>& used, const QVector3D& v1, const QVector3D& v2);
     bool isTwoDirectioned(const QMap<QVector3D, QSet<QVector3D>>& used, const QVector3D& v1, const QVector3D& v2);
     void markUsed(QMap<QVector3D, QSet<QVector3D>>& used, const QVector3D& v1, const QVector3D& v2);
-    bool joinEdge(Edge& e1, Edge& e2);
 };
 
 // just to using in map
