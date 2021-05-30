@@ -2,7 +2,6 @@
 #include "drawer.h"
 #include <QMatrix3x3>
 #include <QMouseEvent>
-#include <QRandomGenerator>
 #include <QWheelEvent>
 #include <iostream>
 #include <simulation/iceberg.h>

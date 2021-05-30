@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QMatrix4x4>
 #include <QObject>
@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLFunctions_3_3_Compatibility>
+#include <assert.h>
 
 #include <light/materialconfig.h>
 
