@@ -138,10 +138,11 @@ void Drawer::keyReleaseEvent(QKeyEvent *event) {
     _viewWrapper.keyReleaseEvent(event);
 }
 
-QOpenGLFunctions_3_3_Compatibility* Drawer::getFuncs() {
-    auto funcs = context()->versionFunctions<QOpenGLFunctions_3_3_Compatibility>();
+IcebergQOpenGLFunctions* Drawer::getFuncs() {
+    auto testFuncs = context()->versionFunctions();
+    auto funcs = context()->versionFunctions<IcebergQOpenGLFunctions>();
     if (!funcs) {
-        qDebug() << "Vertions functions are null\n";
+        qDebug() << "Versions functions are null\n";
         exit(1);
     }
     return funcs;

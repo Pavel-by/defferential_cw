@@ -11,10 +11,10 @@ Figure::~Figure() {
         detach();
 }
 
-QOpenGLFunctions_3_3_Compatibility *Figure::getFuncs() {
-    auto funcs = context->versionFunctions<QOpenGLFunctions_3_3_Compatibility>();
+IcebergQOpenGLFunctions *Figure::getFuncs() {
+    auto funcs = context->versionFunctions<IcebergQOpenGLFunctions>();
     if (!funcs) {
-        qDebug() << "Vertions functions are null\n";
+        qDebug() << "Versions functions are null\n";
         exit(1);
     }
     return funcs;

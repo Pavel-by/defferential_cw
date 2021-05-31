@@ -1,6 +1,6 @@
 #include <QColor>
 #include <QOpenGLContext>
-#include <QOpenGLFunctions_3_3_Compatibility>
+#include <glutils.h>
 #include <QVector3D>
 #include <QVector4D>
 
@@ -17,7 +17,7 @@ struct LightConfig {
     QColor lightSpecular;
 
     void use(QOpenGLContext *context) {
-        auto funcs = context->versionFunctions<QOpenGLFunctions_3_3_Compatibility>();
+        auto funcs = context->versionFunctions<IcebergQOpenGLFunctions>();
         glEnable(light);
         float c[4];
         writeColor(c, lightAmbient);

@@ -50,7 +50,8 @@ HEADERS += \
     simulation/water.h \
     utils/figureserializer.h \
     utils/verticesstretcher.h \
-    viewmatrixwrapper.h
+    viewmatrixwrapper.h \
+    glutils.h
 
 FORMS += \
     editwindow.ui \

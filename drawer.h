@@ -8,6 +8,7 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
+#include <glutils.h>
 
 #include <light/lightconfig.h>
 
@@ -50,6 +51,6 @@ private:
     FigureWrapper _figureWrapper;
     QList<LightConfig*> _lights;
 
-    QOpenGLFunctions_3_3_Compatibility* getFuncs();
+    IcebergQOpenGLFunctions* getFuncs();
 };
 

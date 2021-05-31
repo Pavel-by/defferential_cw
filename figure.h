@@ -4,8 +4,7 @@
 #include <QObject>
 #include <QVector3D>
 #include <QVector>
-#include <QOpenGLFunctions_3_3_Core>
-#include <QOpenGLFunctions_3_3_Compatibility>
+#include <glutils.h>
 #include <assert.h>
 
 #include <light/materialconfig.h>
@@ -76,6 +75,6 @@ private:
     bool _verticesChanged = true;
 
     void allocateBuffers();
-    QOpenGLFunctions_3_3_Compatibility *getFuncs();
+    IcebergQOpenGLFunctions *getFuncs();
 };
 

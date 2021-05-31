@@ -3,7 +3,7 @@
 #include <QColor>
 #include <QObject>
 #include <QGLFunctions>
-#include <QOpenGLFunctions_3_3_Compatibility>
+#include <glutils.h>
 
 struct MaterialConfig {
     static MaterialConfig waterFront;
@@ -20,7 +20,7 @@ struct MaterialConfig {
     GLint materialShininess;
 
     void use(QOpenGLContext *context) {
-        auto funcs = context->versionFunctions<QOpenGLFunctions_3_3_Compatibility>();
+        auto funcs = context->versionFunctions<IcebergQOpenGLFunctions>();
         GLfloat tempColor[4];
         writeColor(tempColor, materialAmbient);
         funcs->glMaterialfv(face, GL_AMBIENT, tempColor);
