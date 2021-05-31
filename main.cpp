@@ -14,10 +14,10 @@ int main(int argc, char *argv[])
 
     QSurfaceFormat *format = new QSurfaceFormat();
     format->setDepthBufferSize(24);
-    format->setMajorVersion(3);
-    format->setMinorVersion(3);
+    format->setMajorVersion(2);
+    format->setMinorVersion(1);
     format->setSamples(4);
-    format->setProfile(QSurfaceFormat::CompatibilityProfile);
+    format->setProfile(QSurfaceFormat::NoProfile);
     QSurfaceFormat::setDefaultFormat(*format);
 
     // Just for test

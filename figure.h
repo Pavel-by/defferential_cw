@@ -67,7 +67,7 @@ private:
     // VEO - array of elements (indicies in VBO)
     GLuint _veo = 0;
     // VAO - configuration of vertices
-    GLuint _vao = 0;
+    //GLuint _vao = 0;
 
     QVector<VertexData> _verticesBuffer;
     QVector<int> _indicesBuffer;
@@ -75,6 +75,8 @@ private:
     bool _verticesChanged = true;
 
     void allocateBuffers();
+    void bindVAO();
+    void unbindVAO();
     IcebergQOpenGLFunctions *getFuncs();
 };
 

@@ -28,11 +28,11 @@ void Figure::attach(QOpenGLContext *context) {
 
     //gl->initializeOpenGLFunctions();
 
-    funcs->glGenVertexArrays(1, &_vao);
+    //funcs->glGenVertexArrays(1, &_vao);
     funcs->glGenBuffers(1, &_vbo);
     funcs->glGenBuffers(1, &_veo);
 
-    funcs->glBindVertexArray(_vao);
+    /*funcs->glBindVertexArray(_vao);
     funcs->glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _veo);
 
@@ -43,6 +43,31 @@ void Figure::attach(QOpenGLContext *context) {
     funcs->glNormalPointer(GL_FLOAT, sizeof(VertexData), reinterpret_cast<GLvoid*>(sizeof(QVector3D)));
 
     funcs->glBindVertexArray(0);
+    funcs->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    funcs->glDisableClientState(GL_VERTEX_ARRAY);
+    funcs->glDisableClientState(GL_NORMAL_ARRAY);*/
+}
+
+void Figure::bindVAO() {
+    auto funcs = getFuncs();
+    //funcs->glBindVertexArray(_vao);
+    // ----
+    funcs->glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _veo);
+
+    funcs->glEnableClientState(GL_VERTEX_ARRAY);
+    funcs->glVertexPointer(3, GL_FLOAT, sizeof(VertexData), 0);
+
+    funcs->glEnableClientState(GL_NORMAL_ARRAY);
+    funcs->glNormalPointer(GL_FLOAT, sizeof(VertexData), reinterpret_cast<GLvoid*>(sizeof(QVector3D)));
+}
+
+void Figure::unbindVAO() {
+    auto funcs = getFuncs();
+    //funcs->glBindVertexArray(0);
+    // ----
+
     funcs->glBindBuffer(GL_ARRAY_BUFFER, 0);
     funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     funcs->glDisableClientState(GL_VERTEX_ARRAY);
@@ -58,15 +83,15 @@ void Figure::paint() {
 
     allocateBuffers();
     funcs->glColor3f(1,0,0);
-    funcs->glBindVertexArray(_vao);
+    bindVAO();
     funcs->glDrawElements(GL_TRIANGLES, _indicesBuffer.size(), GL_UNSIGNED_INT, nullptr);
-    funcs->glBindVertexArray(0);
+    unbindVAO();
 }
 
 void Figure::detach() {
     assert(isAttached());
     auto funcs = getFuncs();
-    funcs->glDeleteVertexArrays(1, &_vao);
+    //funcs->glDeleteVertexArrays(1, &_vao);
     funcs-> glDeleteBuffers(1, &_vbo);
     funcs->glDeleteBuffers(1, &_veo);
     context = nullptr;

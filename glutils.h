@@ -1,8 +1,8 @@
 #ifndef QTUTILS_H
 #define QTUTILS_H
 
-#define IcebergQOpenGLFunctions QOpenGLFunctions_3_3_Compatibility
+#define IcebergQOpenGLFunctions QOpenGLFunctions_2_1
 
-#include <QOpenGLFunctions_3_3_Compatibility>
+#include <QOpenGLFunctions_2_1>
 
 #endif // QTUTILS_H
