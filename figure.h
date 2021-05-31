@@ -63,9 +63,9 @@ private:
     QMatrix4x4 _modelScale;
 
     // VBO - vertices data buffer
-    GLuint _vbo = 0;
+    //GLuint _vbo = 0;
     // VEO - array of elements (indicies in VBO)
-    GLuint _veo = 0;
+    //GLuint _veo = 0;
     // VAO - configuration of vertices
     //GLuint _vao = 0;
 

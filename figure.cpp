@@ -29,8 +29,8 @@ void Figure::attach(QOpenGLContext *context) {
     //gl->initializeOpenGLFunctions();
 
     //funcs->glGenVertexArrays(1, &_vao);
-    funcs->glGenBuffers(1, &_vbo);
-    funcs->glGenBuffers(1, &_veo);
+    /*funcs->glGenBuffers(1, &_vbo);
+    funcs->glGenBuffers(1, &_veo);*/
 
     /*funcs->glBindVertexArray(_vao);
     funcs->glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -53,14 +53,14 @@ void Figure::bindVAO() {
     auto funcs = getFuncs();
     //funcs->glBindVertexArray(_vao);
     // ----
-    funcs->glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    /*funcs->glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _veo);
 
     funcs->glEnableClientState(GL_VERTEX_ARRAY);
     funcs->glVertexPointer(3, GL_FLOAT, sizeof(VertexData), 0);
 
     funcs->glEnableClientState(GL_NORMAL_ARRAY);
-    funcs->glNormalPointer(GL_FLOAT, sizeof(VertexData), reinterpret_cast<GLvoid*>(sizeof(QVector3D)));
+    funcs->glNormalPointer(GL_FLOAT, sizeof(VertexData), reinterpret_cast<GLvoid*>(sizeof(QVector3D)));*/
 }
 
 void Figure::unbindVAO() {
@@ -68,10 +68,10 @@ void Figure::unbindVAO() {
     //funcs->glBindVertexArray(0);
     // ----
 
-    funcs->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    /*funcs->glBindBuffers(GL_ARRAY_BUFFER, 0);
     funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     funcs->glDisableClientState(GL_VERTEX_ARRAY);
-    funcs->glDisableClientState(GL_NORMAL_ARRAY);
+    funcs->glDisableClientState(GL_NORMAL_ARRAY);*/
 }
 
 void Figure::paint() {
@@ -81,19 +81,19 @@ void Figure::paint() {
         config->use(context);
     }
 
-    allocateBuffers();
     funcs->glColor3f(1,0,0);
-    bindVAO();
-    funcs->glDrawElements(GL_TRIANGLES, _indicesBuffer.size(), GL_UNSIGNED_INT, nullptr);
-    unbindVAO();
+    allocateBuffers();
+    //bindVAO();
+    //funcs->glDrawElements(GL_TRIANGLES, _indicesBuffer.size(), GL_UNSIGNED_INT, nullptr);
+    //unbindVAO();
 }
 
 void Figure::detach() {
     assert(isAttached());
     auto funcs = getFuncs();
     //funcs->glDeleteVertexArrays(1, &_vao);
-    funcs-> glDeleteBuffers(1, &_vbo);
-    funcs->glDeleteBuffers(1, &_veo);
+    //funcs-> glDeleteBuffers(1, &_vbo);
+    //funcs->glDeleteBuffers(1, &_veo);
     context = nullptr;
     markVertexChanged();
 }
@@ -103,8 +103,8 @@ bool Figure::isAttached() {
 }
 
 void Figure::allocateBuffers() {
-    if (!_verticesChanged)
-        return;
+    /*if (!_verticesChanged)
+        return;*/
 
     _verticesChanged = false;
 
@@ -138,13 +138,23 @@ void Figure::allocateBuffers() {
     }
 
     auto funcs = getFuncs();
-    funcs->glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+
+    funcs->glBegin(GL_TRIANGLES);
+
+    for (int i = 0; i < _indicesBuffer.size(); i++) {
+        VertexData& data = _verticesBuffer[_indicesBuffer[i]];
+        funcs->glNormal3f(data.normal.x(), data.normal.y(), data.normal.z());
+        funcs->glVertex3f(data.vertex.x(), data.vertex.y(), data.vertex.z());
+    }
+
+    funcs->glEnd();
+    /*funcs->glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     funcs->glBufferData(GL_ARRAY_BUFFER, _verticesBuffer.size() * sizeof(VertexData), _verticesBuffer.constData(), GL_DYNAMIC_DRAW);
     funcs->glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _veo);
     funcs->glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicesBuffer.size() * sizeof(GLuint), _indicesBuffer.constData(), GL_DYNAMIC_DRAW);
-    funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    funcs->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
 }
 
 void Figure::markNeedsPaint() {
