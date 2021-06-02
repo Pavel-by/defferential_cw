@@ -23,6 +23,7 @@ public:
     void startTimer();
     void pauseTimer();
     Polyhedron* generatePoly();
+    Polyhedron* currentPoly();
 
     void loadDefaultFigure();
 

@@ -15,7 +15,7 @@ SimulationWindow::SimulationWindow(Polyhedron* poly, QWidget *parent) : QMainWin
     _water = new Water();
     drawer->addFigure(_iceberg);
     drawer->addFigure(_water);
-    QObject::connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(stepForward()));
+    QObject::connect(ui->underwaterCheckBox, SIGNAL(clicked()), this, SLOT(underwaterClicked()));
     _iceberg->startTimer();
 }
 
@@ -26,7 +26,6 @@ SimulationWindow::~SimulationWindow() {
     delete drawer;
 }
 
-void SimulationWindow::stepForward() {
-    float step = ui->doubleSpinBox->value();
-   _iceberg->stepForward(step);
+void SimulationWindow::underwaterClicked() {
+    _iceberg->setDrawRibs(ui->underwaterCheckBox->isChecked());
 }

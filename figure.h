@@ -51,9 +51,9 @@ public:
     void translate(QVector3D vector);
     void setTranslate(QVector3D vector);
     void clearModel();
+    void setDrawRibs(bool drawRibs);
 
     void markNeedsPaint();
-    void markVertexChanged();
 
 private:
     QOpenGLContext *context = nullptr;
@@ -62,21 +62,8 @@ private:
     QMatrix4x4 _modelTranslate;
     QMatrix4x4 _modelScale;
 
-    // VBO - vertices data buffer
-    //GLuint _vbo = 0;
-    // VEO - array of elements (indicies in VBO)
-    //GLuint _veo = 0;
-    // VAO - configuration of vertices
-    //GLuint _vao = 0;
+    bool _drawRibs = false;
 
-    QVector<VertexData> _verticesBuffer;
-    QVector<int> _indicesBuffer;
-
-    bool _verticesChanged = true;
-
-    void allocateBuffers();
-    void bindVAO();
-    void unbindVAO();
     IcebergQOpenGLFunctions *getFuncs();
 };
 

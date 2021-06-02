@@ -39,13 +39,13 @@ void EditWindow::launchSimulation() {
 }
 
 void EditWindow::loadFigure() {
-    QString filename = QFileDialog::getOpenFileName(this, "Load figure");
+    QString filename = QFileDialog::getOpenFileName(this, "Select file to load");
     FigureSerializer().load(filename, _iceberg);
     heightChanged();
 }
 
 void EditWindow::saveFigure() {
-    QString filename = QFileDialog::getSaveFileName(this, "Load figure");
+    QString filename = QFileDialog::getSaveFileName(this, "Select file where to save figure");
     FigureSerializer().save(_iceberg, filename);
 }
 

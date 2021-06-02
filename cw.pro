@@ -28,7 +28,8 @@ SOURCES += \
     simulation/water.cpp \
     utils/figureserializer.cpp \
     utils/verticesstretcher.cpp \
-    viewmatrixwrapper.cpp
+    viewmatrixwrapper.cpp \
+    simulation/underwater.cpp
 
 HEADERS += \
     cube.h \
@@ -51,7 +52,8 @@ HEADERS += \
     utils/figureserializer.h \
     utils/verticesstretcher.h \
     viewmatrixwrapper.h \
-    glutils.h
+    glutils.h \
+    simulation/underwater.h
 
 FORMS += \
     editwindow.ui \

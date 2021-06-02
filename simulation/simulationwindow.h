@@ -5,6 +5,7 @@
 #include <drawer.h>
 #include "iceberg.h"
 #include "water.h"
+#include <simulation/underwater.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class SimulationWindow; }
@@ -15,7 +16,7 @@ class SimulationWindow : public QMainWindow
     Q_OBJECT
 
 public slots:
-    void stepForward();
+    void underwaterClicked();
 
 public:
     explicit SimulationWindow(Polyhedron* poly, QWidget *parent = nullptr);

@@ -73,7 +73,6 @@ void FigureSerializer::load(const QString& filename, Figure* figure) {
 
     figure->edges = edges;
     figure->clearModel();
-    figure->markVertexChanged();
     figure->markNeedsPaint();
 }
 

@@ -76,7 +76,6 @@ void Iceberg::stepForward(float step) {
     assert(_poly != nullptr);
     _poly->computeNewState(step);
     edges = _poly->faces;
-    markVertexChanged();
     markNeedsPaint();
 }
 
@@ -117,4 +116,6 @@ Polyhedron* Iceberg::generatePoly() {
     return poly;
 }
 
-
+Polyhedron* Iceberg::currentPoly() {
+    return _poly;
+}
