@@ -24,6 +24,7 @@ public:
     void pauseTimer();
     Polyhedron* generatePoly();
     Polyhedron* currentPoly();
+    void setSpeed(float speed);
 
     void loadDefaultFigure();
 
@@ -31,6 +32,7 @@ private:
     Polyhedron* _poly = nullptr;
     QTimer timer;
     clock_t _lastTime = 0;
+    float _speed = 1;
 };
 
 #endif // ICEBERG_H

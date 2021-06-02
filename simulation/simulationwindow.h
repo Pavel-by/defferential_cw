@@ -17,6 +17,7 @@ class SimulationWindow : public QMainWindow
 
 public slots:
     void underwaterClicked();
+    void speedChanged(int speed);
 
 public:
     explicit SimulationWindow(Polyhedron* poly, QWidget *parent = nullptr);

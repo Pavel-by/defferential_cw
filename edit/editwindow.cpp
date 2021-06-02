@@ -8,10 +8,11 @@
 
 EditWindow::EditWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::EditWindow)
 {
+    ui->setupUi(static_cast<QMainWindow*>(this));
+
     setWindowTitle("Preparing figure");
     _drawer = new Drawer();
 
-    ui->setupUi(static_cast<QMainWindow*>(this));
     ui->verticalLayout->addWidget(_drawer, 1);
 
     _iceberg = new Iceberg();

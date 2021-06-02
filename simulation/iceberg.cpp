@@ -102,7 +102,9 @@ void Iceberg::tick() {
     clock_t now = clock();
     float diff = static_cast<float>(now - _lastTime) / CLOCKS_PER_SEC;
     _lastTime = now;
-    stepForward(diff);
+
+    if (_speed > 0)
+        stepForward(diff * _speed);
 }
 
 Polyhedron* Iceberg::generatePoly() {
@@ -118,4 +120,9 @@ Polyhedron* Iceberg::generatePoly() {
 
 Polyhedron* Iceberg::currentPoly() {
     return _poly;
+}
+
+
+void Iceberg::setSpeed(float speed) {
+    _speed = speed;
 }
