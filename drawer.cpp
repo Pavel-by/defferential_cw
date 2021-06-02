@@ -58,9 +58,11 @@ void Drawer::initializeGL() {
 }
 
 void Drawer::resizeGL(int w, int h) {
+    auto funcs = getFuncs();
     float ratio = static_cast<float>(w) / static_cast<float>(h);
     projPerspective = QMatrix4x4();
     projPerspective.perspective(45.0f, ratio, 0.1f, 2000.0f);
+    funcs->glViewport(0, 0, w, h);
 }
 
 void writeColor(float* to, const QColor& color) {
@@ -82,7 +84,7 @@ void Drawer::paintGL() {
     funcs->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     funcs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    funcs->glFrontFace(GL_CW);
+    funcs->glFrontFace(GL_CCW);
 
     funcs->glMatrixMode(GL_MODELVIEW);
     QMatrix4x4 view = _viewWrapper.matrix();

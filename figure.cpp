@@ -132,7 +132,7 @@ void Figure::allocateBuffers() {
         for (const QVector3D& vertex : edge.vertices) {
             _verticesBuffer[vertexPosition++] = {
                 vertex,
-                -normal//(normalMatrix * normal).normalized()
+                normal//(normalMatrix * normal).normalized()
             };
         }
     }
