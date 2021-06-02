@@ -51,6 +51,7 @@ void Polyhedron::computeNewState(float h) {
     x_dot(oldState + h*k3, k4);
     State newState = oldState + h*(k1/6.0f + k2/3.0f + k3/3.0f + k4/6.0f);
     setState(newState);
+    underWater(0);
 }
 
 QMatrix4x4 skewMatrix(QVector3D vec)
@@ -165,6 +166,7 @@ void Polyhedron::underWater(double zWater)
         }
     }
 
+    underwaterFaces = newFaces;
     Polyhedron * uw = new Polyhedron(newFaces, density);
     float volume = uw->mass / uw->density;
     Farch = DENSITY_OF_WATER * G * volume * QVector3D(0, 0, 1);

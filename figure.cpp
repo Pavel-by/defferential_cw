@@ -26,6 +26,9 @@ void Figure::attach(QOpenGLContext *context) {
 }
 
 void Figure::paint() {
+    if (!_isVisible)
+        return;
+
     auto funcs = getFuncs();
 
     for (MaterialConfig *config : materials) {
@@ -94,4 +97,8 @@ void Figure::setTranslate(QVector3D vector) {
 void Figure::setDrawRibs(bool drawRibs) {
     _drawRibs = drawRibs;
     markNeedsPaint();
+}
+
+void Figure::setVisible(bool isVisible) {
+    _isVisible = isVisible;
 }

@@ -29,6 +29,7 @@ private:
     Drawer *drawer;
     Iceberg* _iceberg;
     Water *_water;
+    Underwater *_underwater;
 };
 
 #endif // SIMULATIONWINDOW_H

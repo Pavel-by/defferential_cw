@@ -7,7 +7,10 @@
 
 class Underwater : public Figure
 {
-    //Q_OBJECT
+    Q_OBJECT
+
+public slots:
+    void icebergChanged();
 
 public:
     Underwater();
@@ -15,9 +18,6 @@ public:
 
     void attachIceberg(Iceberg* iceberg);
     void detachIceberg();
-
-private slots:
-    void icebergChanged();
 
 private:
     Iceberg* _iceberg = nullptr;

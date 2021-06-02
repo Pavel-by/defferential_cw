@@ -13,10 +13,15 @@ SimulationWindow::SimulationWindow(Polyhedron* poly, QWidget *parent) : QMainWin
 
     _iceberg = new Iceberg(poly);
     _water = new Water();
+    _underwater = new Underwater();
+    _underwater->attachIceberg(_iceberg);
     drawer->addFigure(_iceberg);
-    drawer->addFigure(_water);
+    drawer->addFigure(_underwater);
+    //drawer->addFigure(_water);
     QObject::connect(ui->underwaterCheckBox, SIGNAL(clicked()), this, SLOT(underwaterClicked()));
     _iceberg->startTimer();
+
+    underwaterClicked();
 }
 
 SimulationWindow::~SimulationWindow() {
@@ -27,5 +32,7 @@ SimulationWindow::~SimulationWindow() {
 }
 
 void SimulationWindow::underwaterClicked() {
-    _iceberg->setDrawRibs(ui->underwaterCheckBox->isChecked());
+    bool underwaterEnabled = ui->underwaterCheckBox->isChecked();
+    _iceberg->setDrawRibs(underwaterEnabled);
+    _underwater->setVisible(underwaterEnabled);
 }

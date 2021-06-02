@@ -52,6 +52,7 @@ public:
     void setTranslate(QVector3D vector);
     void clearModel();
     void setDrawRibs(bool drawRibs);
+    void setVisible(bool isVisible);
 
     void markNeedsPaint();
 
@@ -63,6 +64,7 @@ private:
     QMatrix4x4 _modelScale;
 
     bool _drawRibs = false;
+    bool _isVisible = true;
 
     IcebergQOpenGLFunctions *getFuncs();
 };

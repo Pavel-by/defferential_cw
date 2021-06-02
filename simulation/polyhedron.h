@@ -39,6 +39,7 @@ public:
     Polyhedron(QVector<Edge> faces, double density = 916.7);
 
     QVector<Edge> faces;
+    QVector<Edge> underwaterFaces;
 	double density, mass;
 
     void computeNewState(float h);
