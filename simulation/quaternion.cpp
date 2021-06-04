@@ -31,11 +31,12 @@ Quaternion &Quaternion::operator+=(const Quaternion &other)
 
 QMatrix4x4 Quaternion::toMatrix()
 {
+    this->normalize();
     float a = s, b = v.x(), c = v.y(), d = v.z();
-    float r[] = {a*a + b*b - c*c - d*d, 2*b*c - 2*a*d, 2*b*d + 2*a*c, 0,
-                2*b*c + 2*a*d, a*a - b*b + c*c - d*d, 2*c*d - 2*a*b, 0,
-                2*b*d - 2*a*c, 2*c*d + 2*a*b, a*a - b*b - c*c + d*d, 0,
-                0, 0, 0, 1};
+    float r[] = {1 - 2*c*c - 2*d*d, 2*b*c - 2*a*d, 2*b*d + 2*a*c, 0,
+                    2*b*c + 2*a*d, 1 - 2*b*b - 2*d*d, 2*c*d - 2*a*b, 0,
+                    2*b*d - 2*a*c, 2*c*d + 2*a*b, 1 - 2*b*b - 2*c*c, 0,
+                    0, 0, 0, 1};
     return QMatrix4x4(r);
 }
 
