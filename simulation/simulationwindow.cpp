@@ -44,3 +44,7 @@ void SimulationWindow::speedChanged(int sliderValue) {
     float speed = static_cast<float>(sliderValue) / 20;
     _iceberg->setSpeed(speed);
 }
+
+void SimulationWindow::closeEvent(QCloseEvent *event) {
+    _iceberg->pauseTimer();
+}

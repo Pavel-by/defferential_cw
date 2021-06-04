@@ -26,6 +26,8 @@ public:
 protected:
     Ui::SimulationWindow *ui;
 
+    void closeEvent(QCloseEvent *event) override;
+
 private:
     Drawer *drawer;
     Iceberg* _iceberg;
