@@ -77,9 +77,7 @@ void Polyhedron::x_dot(State state, State& state_dot)
 }
 
 QVector3D Polyhedron::calculateOmega() {
-    QMatrix4x4 Jcurr = R*J*R.transposed();
-    QMatrix4x4 Jinv = Jcurr.inverted();
-    QVector3D omega = Jinv * L;
+    QVector3D omega = R*J.inverted()*R.transposed() * L;
     return omega;
 }
 
@@ -93,10 +91,8 @@ QVector3D Polyhedron::calculateForces()
 
 QVector3D Polyhedron::calculateTau()
 {
-    if (Farch == QVector3D(0, 0, 0)) {
-        return QVector3D(0, 0, 0);
-    }
-    return QVector3D::crossProduct(cUnderWater - c, mass * G * QVector3D(0, 0, -1) + Farch) - 0.2*L;
+    QVector3D tau = 0.5 * QVector3D::crossProduct(cUnderWater - c, Farch) - 0.2*L;
+    return tau;
 }
 
 void Polyhedron::setState(State state)
@@ -165,7 +161,6 @@ void Polyhedron::underWater(double zWater)
             newFaces.append(newEdge);
         }
     }
-
     underwaterFaces = newFaces;
     Polyhedron * uw = new Polyhedron(newFaces, density);
     float volume = uw->mass / uw->density;
@@ -220,9 +215,9 @@ const QVector3D& Polyhedron::getC() {
     return c;
 }
 bool Polyhedron::isSamePoint(float first, float second) {
-    return std::abs(first - second) < 0.000001f;
+    return std::abs(first - second) < 0.00001f;
 }
 
 bool Polyhedron::isSamePoint(const QVector3D& first, const QVector3D& second) {
-    return isSamePoint(first.distanceToPoint(second), 0.0f);
+    return isSamePoint((first -second).length(), 0.0f);
 }

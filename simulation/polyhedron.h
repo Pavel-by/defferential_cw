@@ -6,7 +6,7 @@
 #include "quaternion.h"
 #include "state.h"
 
-#define DENSITY_OF_WATER 1030 /* kg/m3 */
+#define DENSITY_OF_WATER 997.0f /* kg/m3 */
 #define G 9.80665
 
 
