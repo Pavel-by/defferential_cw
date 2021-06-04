@@ -40,6 +40,7 @@ public:
     QList<MaterialConfig*> materials;
 
     QMatrix4x4 model() const;
+    const QMatrix4x4& modelRotation() const;
 
     void attach(QOpenGLContext *context);
     void paint();

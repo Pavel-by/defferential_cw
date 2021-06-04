@@ -102,3 +102,7 @@ void Figure::setDrawRibs(bool drawRibs) {
 void Figure::setVisible(bool isVisible) {
     _isVisible = isVisible;
 }
+
+const QMatrix4x4& Figure::modelRotation() const {
+    return _modelRotation;
+}
