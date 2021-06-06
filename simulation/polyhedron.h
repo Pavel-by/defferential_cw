@@ -40,7 +40,7 @@ public:
 
     QVector<Edge> faces;
     QVector<Edge> underwaterFaces;
-	double density, mass;
+    double density, mass;
 
     void computeNewState(float h);
 
