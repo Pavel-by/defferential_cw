@@ -65,7 +65,16 @@ QMatrix4x4 skewMatrix(QVector3D vec)
 
 void Polyhedron::x_dot(State state, State& state_dot)
 {
-    Polyhedron * tmp = new Polyhedron(this->faces);
+    QVector<Edge> newFaces;
+    newFaces.resize(faces.length());
+    for (int i = 0; i < faces.length(); i++) {
+        newFaces[i].vertices.resize(faces[i].vertices.length());
+        for (int j = 0; j < faces[i].vertices.length(); j++) {
+            newFaces[i].vertices[j] = faces[i].vertices[j] - this->c;
+            newFaces[i].vertices[j] = this->R.inverted() * faces[i].vertices[j];
+        }
+    }
+    Polyhedron * tmp = new Polyhedron(newFaces);
     tmp->setState(state);
     state_dot.c = tmp->p/tmp->mass;
     state_dot.p = tmp->calculateForces();
