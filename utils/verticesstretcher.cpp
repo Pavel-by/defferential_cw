@@ -58,7 +58,10 @@ void VerticesStretcher::prepareFirstEdge(const QList<QVector3D> &vertices, Edge 
         p2 = vertices[1];
 
     for (const QVector3D& v : vertices) {
-        if (QVector3D::dotProduct((p2 - p1).normalized(), normal) < QVector3D::dotProduct((v - p1).normalized(), normal))
+        if (v == p1)
+            continue;
+
+        if (QVector3D::dotProduct((p2 - p1).normalized(), normal) > QVector3D::dotProduct((v - p1).normalized(), normal))
             p2 = v;
     }
     edge.vertices[0] = p1;
@@ -86,7 +89,12 @@ bool VerticesStretcher::isTwoDirectioned(const QMap<QVector3D, QSet<QVector3D>> 
 }
 
 void VerticesStretcher::markUsed(QMap<QVector3D, QSet<QVector3D>>& used, const QVector3D& v1, const QVector3D& v2) {
-    assert(!isUsed(used, v1, v2));
+    // assert(!isUsed(used, v1, v2)); TODO
+    if (isUsed(used, v1, v2)) {
+        qDebug() << "AAA\n";
+        return;
+    }
+    qDebug() << "Vector(" << v1 << ", " << v2 << ")\n";
     used[v1].insert(v2);
 }
 
@@ -128,7 +136,7 @@ void VerticesStretcher::finalizeEdge(const QList<QVector3D> &vertices, QMap<QVec
         QVector3D nearestPoint = startPoint - compareVector;
 
         for (const QVector3D& v : planeVertices) {
-            if (isSamePoint(v, startPoint) || isSamePoint(v, edge.vertices.last()))
+            if (isSamePoint(v, startPoint))
                 continue;
 
             float currentCos = QVector3D::dotProduct(compareVector, (nearestPoint - startPoint).normalized());
