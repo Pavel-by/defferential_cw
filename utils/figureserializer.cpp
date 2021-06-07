@@ -41,29 +41,30 @@ void FigureSerializer::load(const QString& filename, Figure* figure) {
     if (edges.isEmpty())
         return;
 
-    QVector3D min = edges[0].vertices[0], max = edges[0].vertices[0];
+    float min = edges[0].vertices[0].x(), max = edges[0].vertices[0].x();
 
     for (const Edge& edge : edges) {
         for (const QVector3D& v : edge.vertices) {
-            min.setX(std::min(min.x(), v.x()));
-            min.setY(std::min(min.y(), v.y()));
-            min.setZ(std::min(min.z(), v.z()));
-
-            max.setX(std::max(max.x(), v.x()));
-            max.setY(std::max(max.y(), v.y()));
-            max.setZ(std::max(max.z(), v.z()));
+            min = std::min(min, v.x());
+            min = std::min(min, v.y());
+            min = std::min(min, v.z());
+            max = std::max(max, v.x());
+            max = std::max(max, v.y());
+            max = std::max(max, v.z());
         }
     }
 
-    QVector3D center = (min + max) / 2;
+    float center = (min + max) / 2;
 
     for (Edge& edge : edges) {
         for (QVector3D& v : edge.vertices) {
-            v -= center;
+            v.setX(v.x() - center);
+            v.setY(v.y() - center);
+            v.setZ(v.z() - center);
         }
     }
 
-    QVector3D diff = max - min;
+    float diff = max - min;
 
     for (Edge& edge : edges) {
         for (QVector3D& v : edge.vertices) {
