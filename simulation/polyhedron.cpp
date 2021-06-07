@@ -52,6 +52,11 @@ void Polyhedron::computeNewState(float h) {
     State newState = oldState + h*(k1/6.0f + k2/3.0f + k3/3.0f + k4/6.0f);
     setState(newState);
     underWater(0);
+    QVector3D omega = calculateOmega();
+    QVector3D omJ = omega * J;
+    double rotationEnergy = 0.5 * QVector3D::dotProduct(omJ, omega);
+    cout << "h: " << c.z() << endl;
+    cout << "Rot en: " << rotationEnergy << endl;
 }
 
 QMatrix4x4 skewMatrix(QVector3D vec)
@@ -100,7 +105,8 @@ QVector3D Polyhedron::calculateForces()
 
 QVector3D Polyhedron::calculateTau()
 {
-    QVector3D tau = 0.5 * QVector3D::crossProduct(cUnderWater - c, Farch) - 0.2*L;
+    float k = 0.2*(this->density * Farch.z() / DENSITY_OF_WATER / G / this->mass);
+    QVector3D tau = 0.5 * QVector3D::crossProduct(cUnderWater - c, Farch) - k*L;
     return tau;
 }
 
