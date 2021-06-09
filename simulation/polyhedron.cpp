@@ -20,8 +20,10 @@ Polyhedron::Polyhedron(QVector<Edge> faces, double density)
 {
     int numFaces = faces.length();
     this->faces.resize(numFaces);
+    this->initialForm.resize(numFaces);
     for (int i = 0; i < numFaces; i++) {
         this->faces[i] = (const Edge&) faces[i];
+        this->initialForm[i] = (const Edge&) faces[i];
     }
     if (density > DENSITY_OF_WATER) {
         this->density = 916.7;
@@ -32,6 +34,11 @@ Polyhedron::Polyhedron(QVector<Edge> faces, double density)
     IntegralCalculator calc;
     J = calc.getInertiaTensor(this);
     c = calc.getCenterOfMass(this);
+    for (int i = 0; i < initialForm.length(); i++) {
+        for (int j = 0; j < initialForm[i].vertices.length(); j++) {
+            initialForm[i].vertices[j] -= this->c;
+        }
+    }
     mass = calc.getMass(this);
 }
 
@@ -53,7 +60,8 @@ void Polyhedron::computeNewState(float h) {
     setState(newState);
     underWater(0);
     QVector3D omega = calculateOmega();
-    QVector3D omJ = omega * J;
+    QMatrix4x4 Jcurr = R*J*R.transposed();
+    QVector3D omJ = omega * Jcurr;
     double rotationEnergy = 0.5 * QVector3D::dotProduct(omJ, omega);
     cout << "h: " << c.z() << endl;
     cout << "Rot en: " << rotationEnergy << endl;
@@ -70,7 +78,7 @@ QMatrix4x4 skewMatrix(QVector3D vec)
 
 void Polyhedron::x_dot(State state, State& state_dot)
 {
-    QVector<Edge> newFaces;
+    /*QVector<Edge> newFaces;
     newFaces.resize(faces.length());
     for (int i = 0; i < faces.length(); i++) {
         newFaces[i].vertices.resize(faces[i].vertices.length());
@@ -78,8 +86,8 @@ void Polyhedron::x_dot(State state, State& state_dot)
             newFaces[i].vertices[j] = faces[i].vertices[j] - this->c;
             newFaces[i].vertices[j] = this->R.inverted() * faces[i].vertices[j];
         }
-    }
-    Polyhedron * tmp = new Polyhedron(newFaces);
+    }*/
+    Polyhedron * tmp = new Polyhedron(this->initialForm);
     tmp->setState(state);
     state_dot.c = tmp->p/tmp->mass;
     state_dot.p = tmp->calculateForces();
@@ -121,10 +129,9 @@ void Polyhedron::setState(State state)
 
     for (int i = 0; i < faces.length(); i++) {
         for (int j = 0; j < faces[i].vertices.length(); j++) {
-            faces[i].vertices[j] -= this->c;
-            faces[i].vertices[j] = this->R.inverted() * faces[i].vertices[j];
-            faces[i].vertices[j] = R * faces[i].vertices[j];
-            faces[i].vertices[j] += state.c;
+            //faces[i].vertices[j] -= this->c;
+            //faces[i].vertices[j] = this->R.inverted() * faces[i].vertices[j];
+            faces[i].vertices[j] = R * initialForm[i].vertices[j] + state.c;
         }
     }
     this->c = state.c;
